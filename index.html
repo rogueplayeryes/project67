@@ -4514,7 +4514,7 @@ function renderEditor(){
     var fq=el('div','fields');
     var isT=t==='trench';
     var symOn=!isV&&!!f.sym;
-    fq.appendChild(fieldEl(f,'length',symOn?'Längd mellan kortsidorna':(isT?'Längd':'Långsida 1'),'m',false,symOn?'':'L1'));
+    fq.appendChild(fieldEl(f,'length',symOn?'Längd mellan kortsidorna':(isT?'Längd':'Långsida 1'),'m',symOn,symOn?'':'L1'));
     if(!symOn){var l2=fieldEl(f,'length2',isT?'Längd, andra sidan':'Långsida 2','m',false,'L2');l2.querySelector('input').placeholder='samma';fq.appendChild(l2);}
     fq.appendChild(fieldEl(f,'width',isT?'Bottenbredd vid start':'Kortsida 1','m',false,'K1'));
     var w2=fieldEl(f,'width2',isT?'Bottenbredd vid slut':'Kortsida 2','m',false,'K2');w2.querySelector('input').placeholder='samma';fq.appendChild(w2);

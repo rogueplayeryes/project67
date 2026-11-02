@@ -2202,18 +2202,51 @@ function readParts(f,z,E){
 /* Voter: diken i schaktbotten längs insidan av valda sidor, samt tvärgående diken om man vill. De ligger under botten och räknas som schakt.
    Varje vot kan ha eget material, egen bredd och eget djup (V0.o[sida] eller extra[i]). Tomt fält använder det gemensamma värdet, och är det tomt också 0,3 m.
    Voten fylls upp till schaktbotten med sitt material. Delar av diket längs kortsidorna kortas så att hörnen inte räknas två gånger. */
+/* Fyllning i voter görs i lager nerifrån och upp, som lagren från schaktbotten. Lager utan tjocklek fyller resten upp till schaktbotten.
+   Gamla ritningar med ett material (mat, own) blir ett lager. Egen vot: mode 'none' (öppen) eller 'own' (egna lager), annars gemensamma lager. */
+function votNorm(o,common){
+  if(!o||o.lay)return;
+  o.lay=[];
+  if(common){if(o.mat)o.lay.push({mat:o.mat,own:!!o.own,t:''});}
+  else if(o.mat==='none')o.mode='none';
+  else if(o.mat){o.mode='own';o.lay.push({mat:o.mat,own:!!o.own,t:''});}
+  delete o.mat;delete o.own;
+}
+/* Delar upp en vots djup i fyllda lager och en öppen rest överst */
+function votSegs(lay,dd){
+  var segs=[],h=0;
+  for(var i=0;i<lay.length&&h<dd-1e-9;i++){
+    var L=lay[i];if(!L||!L.mat)continue;
+    var t=blank(L.t)||halfTyped(L.t)?null:numLen(L.t),th=t===null?dd-h:Math.min(t,dd-h);
+    if(!(th>1e-9))continue;
+    segs.push({h0:h,h1:h+th,mat:L.mat,own:!!L.own});h+=th;
+    if(t===null)break;
+  }
+  if(h<dd-1e-9)segs.push({h0:h,h1:dd,mat:'',own:false});
+  return segs;
+}
+/* Lägger en vot som en kropp per lager (öppen rest blå) och en fyllningspost per fyllt lager */
+function votPush(sol,strips,top,bot,A,dd,dm,label,sh3){
+  votSegs(dm.lay,dd).forEach(function(sg){
+    var lo=top.map(function(p,i){return [p[0],Math.min(bot[i][1]+sg.h0,p[1]),p[2]];}),hi=top.map(function(p,i){return [p[0],Math.min(bot[i][1]+sg.h1,p[1]),p[2]];});
+    var M=sg.mat?massa(sg.mat):null,Vs=A*(sg.h1-sg.h0);
+    sol.push({rings3:[hi.map(sh3),lo.map(sh3)],wallName:function(){return 'Vot';},capNames:['Vot','Vot'],color:M?M[3]:'#5b7fa3',vol:Vs});
+    if(sg.mat)strips.push({label:label,V:Vs,mat:sg.mat,own:sg.own,w:dm.w});
+  });
+  return {rings3:[top.map(sh3),bot.map(sh3)]};
+}
 function votBuild(f,q,tags0,floorAt,sh3){
   var V0=f.vot;if(!V0||!V0.on)return null;
   function rd(v){if(blank(v)||halfTyped(v))return null;return numLen(v);}
-  var bad=null,sol=[],strips=[],vol=0,len=0,asum=0;
+  var bad=null,sol=[],strips=[],vol=0,len=0,asum=0,ref=null;
   /* Mått för en vot: eget går före gemensamt. Eget totalt djup, eget djup under botten, gemensamt totalt djup, gemensamt djup, i den ordningen. */
   function dims(o){
     o=o||{};var w=rd(o.w);if(w===null)w=rd(V0.w);if(w===null)w=0.3;
     var d=0.3,ab=null,oa=rd(o.abs),od=rd(o.d),ga=rd(V0.abs),gd=rd(V0.d);
     if(oa!==null)ab=oa;else if(od!==null)d=od;else if(ga!==null)ab=ga;else if(gd!==null)d=gd;
     if(!isFinite(w)||w<=0||w>5||!isFinite(d)||d<=0||d>5||(ab!==null&&(!isFinite(ab)||ab<=0||ab>50)))bad=bad||'Skriv bredd och djup för voterna i meter, till exempel 0,3.';
-    var mat=o.mat==='none'?'':(o.mat||V0.mat||''),own=o.mat&&o.mat!=='none'?!!o.own:!!V0.own;
-    return {w:w,d:d,ab:ab,mat:mat,own:own};
+    votNorm(V0,true);votNorm(o,false);
+    return {w:w,d:d,ab:ab,lay:o.mode==='none'?[]:(o.mode==='own'?o.lay:V0.lay)};
   }
   function wOf(tg){return dims((V0.o||{})[tg]).w;}
   var stripA=0;
@@ -2221,10 +2254,8 @@ function votBuild(f,q,tags0,floorAt,sh3){
     if(!plan||plan.length<3)return;var A=Math.abs(polyArea(plan));if(A<1e-6)return;
     var top=plan.map(function(p){return [p[0],floorAt(p[0],p[1]),p[1]];}),mt=0;top.forEach(function(p){mt+=p[1];});mt/=top.length;
     var dd=dm.ab!==null?dm.ab+mt:dm.d;if(!(dd>1e-6)){bad=bad||'Voten måste vara djupare än schaktbotten. Öka totalt djup från marken eller lämna tomt.';return;}
-    var bot=top.map(function(p){return [p[0],dm.ab!==null?-dm.ab:p[1]-dm.d,p[2]];}),M=dm.mat?massa(dm.mat):null;
-    /* Öppen vot får samma färg som schaktet, så att den ser ut som en del av schaktbotten. Fylld vot får materialets färg. */
-    sol.push({rings3:[top.map(sh3),bot.map(sh3)],wallName:function(){return 'Vot';},capNames:['Vot','Vot'],color:M?M[3]:(f.color||'#e0955a'),vol:A*dd});
-    strips.push({label:label,V:A*dd,mat:dm.mat,own:dm.own,w:dm.w,dd:dd,sd:sol[sol.length-1]});
+    var bot=top.map(function(p){return [p[0],dm.ab!==null?-dm.ab:p[1]-dm.d,p[2]];});
+    var rf=votPush(sol,strips,top,bot,A,dd,dm,label,sh3);if(!ref)ref=rf;
     vol+=A*dd;asum+=A;len+=L!=null?L:A/dm.w;if(isExtra)stripA+=A;
   }
   var sel={L1:!!V0.L1,K2:!!V0.K2,L2:!!V0.L2,K1:!!V0.K1},ccw=polyArea(q)>0;
@@ -2263,7 +2294,7 @@ function votBuild(f,q,tags0,floorAt,sh3){
   if(bad)return {bad:bad};
   /* Innanför ramen: ytan på botten mellan voterna ligger kvar som orörd botten. Lagren under Återfyllning startar på schaktbotten. */
   var ground=null;
-  if(strips.length){
+  if(vol>0){
     var mx0=minx+(sel.K1?wOf('K1'):0),mx1=maxx-(sel.K2?wOf('K2'):0),mz0=minz+(sel.L1?wOf('L1'):0),mz1=maxz-(sel.L2?wOf('L2'):0);
     var m1=clipHalf(q,tags,mx0,true,0,'cut'),m2=clipHalf(m1.poly,m1.tags,mx1,false,0,'cut'),m3=clipHalf(m2.poly,m2.tags,mz0,true,1,'cut'),m4=clipHalf(m3.poly,m3.tags,mz1,false,1,'cut');
     if(m4.poly.length>=3){
@@ -2275,7 +2306,7 @@ function votBuild(f,q,tags0,floorAt,sh3){
       }
     }
   }
-  return {solids:sol,strips:strips,vol:vol,len:len,d:asum>1e-9?vol/asum:0.3,ground:ground};
+  return {solids:sol,strips:strips,vol:vol,len:len,d:asum>1e-9?vol/asum:0.3,ground:ground,ref:ref};
 }
 /* Lägger voternas volym, fyllning och mått på figuren. Ger extra volym att lägga till schaktet. */
 function votApply(ev,VB,s){
@@ -2293,8 +2324,7 @@ function votApply(ev,VB,s){
   Object.keys(fa).forEach(function(nm){ev.info.push(['Fyllning i voter',nm+', '+fmtV(fa[nm])]);});
   ev.votFills.forEach(function(R){if(R.warn.length)ev.info.push(['Varning voter',R.warn.join(' ')]);});
   /* Mått i 3D: hur mycket djupare voten går än schaktbotten, så att det inte ser ut som att hela gropen är djupare */
-  var s0=VB.strips[0];
-  if(s0&&s0.sd){var rg=s0.sd.rings3,tp0=rg[0][0],bt0=rg[1][0];ev.dims.push(dim([tp0[0],tp0[1],tp0[2]],[bt0[0],bt0[1],bt0[2]],[s*0.7,0,s*0.7],'Vot +'+fmtM(Math.round((tp0[1]-bt0[1])*100)/100)+' under botten'));}
+  if(VB.ref){var rg=VB.ref.rings3,tp0=rg[0][0],bt0=rg[1][0];ev.dims.push(dim([tp0[0],tp0[1],tp0[2]],[bt0[0],bt0[1],bt0[2]],[s*0.7,0,s*0.7],'Vot +'+fmtM(Math.round((tp0[1]-bt0[1])*100)/100)+' under botten'));}
   if(VB.ground)ev.vot.unshift(VB.ground);
   return VB.vol;
 }
@@ -2303,15 +2333,15 @@ function votApply(ev,VB,s){
 function votBuildPoly(f,ring,tags,floorAt){
   var V0=f.vot;if(!V0||!V0.on)return null;
   function rd(v){if(blank(v)||halfTyped(v))return null;return numLen(v);}
-  var bad=null,sol=[],strips=[],vol=0,len=0,asum=0,N=ring.length,CS=V0.cs||{},ident=function(p){return p;};
+  var bad=null,sol=[],strips=[],vol=0,len=0,asum=0,N=ring.length,CS=V0.cs||{},ident=function(p){return p;},ref=null;
   tags=tags||[];
   function dims(o){
     o=o||{};var w=rd(o.w);if(w===null)w=rd(V0.w);if(w===null)w=0.3;
     var d=0.3,ab=null,oa=rd(o.abs),od=rd(o.d),ga=rd(V0.abs),gd=rd(V0.d);
     if(oa!==null)ab=oa;else if(od!==null)d=od;else if(ga!==null)ab=ga;else if(gd!==null)d=gd;
     if(!isFinite(w)||w<=0||w>5||!isFinite(d)||d<=0||d>5||(ab!==null&&(!isFinite(ab)||ab<=0||ab>50)))bad=bad||'Skriv bredd och djup för voterna i meter, till exempel 0,3.';
-    var mat=o.mat==='none'?'':(o.mat||V0.mat||''),own=o.mat&&o.mat!=='none'?!!o.own:!!V0.own;
-    return {w:w,d:d,ab:ab,mat:mat,own:own};
+    votNorm(V0,true);votNorm(o,false);
+    return {w:w,d:d,ab:ab,lay:o.mode==='none'?[]:(o.mode==='own'?o.lay:V0.lay)};
   }
   /* Punkt på insidan: hörnets vinkelrät-halverande linje, samma som offsetPoly */
   function inner(k,w){
@@ -2365,23 +2395,22 @@ function votBuildPoly(f,ring,tags,floorAt){
     if(selfIntersects(poly)){bad=bad||'Voten är för bred för sidan '+g.tag.replace(/^(Sida|Hörn) /,'')+'. Minska bredden.';return;}
     var top=poly.map(function(p){return [p[0],floorAt(p[0],p[1]),p[1]];}),mt=0;top.forEach(function(p){mt+=p[1];});mt/=top.length;
     var dd=dm.ab!==null?dm.ab+mt:dm.d;if(!(dd>1e-6)){bad=bad||'Voten måste vara djupare än schaktbotten. Öka totalt djup från marken eller lämna tomt.';return;}
-    var bot=top.map(function(p){return [p[0],dm.ab!==null?-dm.ab:p[1]-dm.d,p[2]];}),M=dm.mat?massa(dm.mat):null;
-    sol.push({rings3:[top.map(ident),bot.map(ident)],wallName:function(){return 'Vot';},capNames:['Vot','Vot'],color:M?M[3]:(f.color||'#e0955a'),vol:A*dd});
-    strips.push({label:g.tag,V:A*dd,mat:dm.mat,own:dm.own,w:dm.w,dd:dd,sd:sol[sol.length-1]});
+    var bot=top.map(function(p){return [p[0],dm.ab!==null?-dm.ab:p[1]-dm.d,p[2]];});
+    var rf=votPush(sol,strips,top,bot,A,dd,dm,g.tag,ident);if(!ref)ref=rf;
     vol+=A*dd;asum+=A;len+=L;
     for(var j2=g.s;j2<=g.e+1;j2++)wv[j2%N]=Math.max(wv[j2%N],dm.w);
   });
   if(bad)return {bad:bad};
   /* Orörd botten innanför ramen, som fast mark från voternas botten upp till schaktbotten */
   var ground=null;
-  if(strips.length){
+  if(vol>0){
     var gp=trimInv(ring.map(function(p,i){return wv[i]>0?inner(i,wv[i]):p;}),ring,false),Ag=polyArea(gp),dM=vol/asum;
     if(Ag>1e-6&&Ag<=Math.abs(polyArea(ring))&&!selfIntersects(gp)){
       var gtop=gp.map(function(p){return [p[0],floorAt(p[0],p[1]),p[1]];}),gbot=gtop.map(function(p){return [p[0],p[1]-dM,p[2]];});
       ground={rings3:[gtop,gbot],wallName:function(){return 'Orörd botten';},capNames:['Orörd botten','Orörd botten'],color:'#9b8e7e',vol:0};
     }
   }
-  return {solids:sol,strips:strips,vol:vol,len:len,d:asum>1e-9?vol/asum:0.3,ground:ground};
+  return {solids:sol,strips:strips,vol:vol,len:len,d:asum>1e-9?vol/asum:0.3,ground:ground,ref:ref};
 }
 function evalQuad(ev,f){
   var E=ev.errors;
@@ -3952,7 +3981,7 @@ function autoFillOn(f){
   if(f.fill&&(f.fill.on||f.fill.off))return false;
   var ev=evOf(f);if(ev.volume==null)return false;
   f.fill=f.fill||{zones:{}};f.fill.on=true;
-  if(!f.fill.layers)f.fill.layers=[{mat:'fyll',mode:'h',val:fmtRaw(Math.round((ev.depth||1)/2*10)/10),color:''}];
+  if(!f.fill.layers)f.fill.layers=[];
   app.evs={};return true;
 }
 function fillUI(f,box){
@@ -3960,7 +3989,7 @@ function fillUI(f,box){
   var ck=el('label','check');var cb=el('input');cb.type='checkbox';cb.checked=on;
   cb.addEventListener('change',function(){
     f.fill=f.fill||{zones:{}};f.fill.on=cb.checked;f.fill.off=!cb.checked;
-    if(cb.checked&&!f.fill.layers){var ev=evaluate(f),D=ev.depth||1;f.fill.layers=[{mat:'fyll',mode:'h',val:fmtRaw(Math.round(D/2*10)/10),color:''}];}
+    if(cb.checked&&!f.fill.layers)f.fill.layers=[];
     refresh({editor:true});if(cb.checked)lblWarn('depth','volymen för varje lager i 3D-vyn');
   });
   ck.appendChild(cb);ck.appendChild(document.createTextNode('Återfyll från schaktbotten'));b.appendChild(ck);
@@ -3975,7 +4004,7 @@ function fillUI(f,box){
     hd.appendChild(sl);
     var col=el('input','fill-col');col.type='color';col.value=ly.color||massa(ly.mat)[3];col.title='Välj färg';col.setAttribute('aria-label','Färg för lager '+(i+1));
     col.addEventListener('input',function(){ly.color=col.value;refresh({});});hd.appendChild(col);
-    if(L.length>1){var rm=el('button','rm','×');rm.setAttribute('aria-label','Ta bort lager '+(i+1));rm.addEventListener('click',function(){L.splice(i,1);refresh({editor:true});});hd.appendChild(rm);}
+    var rm=el('button','rm','×');rm.setAttribute('aria-label','Ta bort lager '+(i+1));rm.addEventListener('click',function(){L.splice(i,1);refresh({editor:true});});hd.appendChild(rm);
     card.appendChild(hd);
     var row=el('div','fill-row');
     var w=el('div','inp');var inp=el('input');inp.inputMode='decimal';inp.value=ly.val;inp.dataset.layerval=i;inp.setAttribute('aria-label',(ly.mode==='v'?'Volym':'Tjocklek')+' för lager '+(i+1));
@@ -4009,8 +4038,11 @@ function fillUI(f,box){
   var pk=el('label','fill-dmax');pk.appendChild(document.createTextNode('Packas i lager om högst'));var pki=el('input');pki.inputMode='decimal';pki.value=f.fill.lift||'';pki.placeholder='0,3';pki.setAttribute('aria-label','Största lagertjocklek vid packning i meter');
   pki.addEventListener('input',function(){f.fill.lift=pki.value;refresh({});});pk.appendChild(pki);pk.appendChild(document.createTextNode('m'));b.appendChild(pk);
   b.appendChild(el('div','small-note',fol?'Varje lager har samma tjocklek längs hela schaktet, även när botten har fall.':'Lagren läggs vågrätt från lägsta punkten.'));
-  var add=el('button','wide-btn','Lägg till lager ovanpå');
-  add.addEventListener('click',function(){var last=L[L.length-1];L.push({mat:last&&last.mat==='mak1632'?'sand':'sand',mode:'h',val:'0,1',color:''});refresh({editor:true});});
+  /* Inget lager är förvalt, man väljer massa för att lägga till ett */
+  var add=el('select','wide-btn');add.setAttribute('aria-label',L.length?'Lägg till lager ovanpå':'Välj vad som ska fyllas med');
+  var ph=el('option',null,L.length?'Lägg till lager ovanpå, välj massa':'Fyll med, välj massa');ph.value='';add.appendChild(ph);
+  massorSorted().forEach(function(m){var op=el('option',null,m[1]);op.value=m[0];add.appendChild(op);});
+  add.value='';add.addEventListener('change',function(){if(!add.value)return;L.push({mat:add.value,mode:'h',val:'0,1',color:''});add.blur();refresh({editor:true});});
   b.appendChild(add);
   var fzi=evOf(f).zoneInfo,fparts=(fzi&&fzi.parts)||[],anyPart=fparts.some(function(n){return n>1;});
   if(((f.nZones||0)>=2||anyPart)&&(TYPES[f.type].quad||TYPES[f.type].vquad)){
@@ -4053,35 +4085,57 @@ function votUI(f,b){
   var V=f.vot=f.vot||{on:false};
   var ck=el('label','check'),cb=el('input');cb.type='checkbox';cb.checked=!!V.on;
   var cust=f.type==='custom';
-  cb.addEventListener('change',function(){V.on=cb.checked;if(cb.checked&&cust&&!V.cs){V.cs={};votTags(f).forEach(function(t){V.cs[t]=true;});}if(cb.checked&&!cust&&V.L1==null){V.L1=V.L2=V.K1=V.K2=true;V.extra=V.extra||[];}if(cb.checked&&V.mat==null){V.mat='fyll';V.own=true;}refresh({editor:true});});
+  cb.addEventListener('change',function(){V.on=cb.checked;if(cb.checked&&cust&&!V.cs){V.cs={};votTags(f).forEach(function(t){V.cs[t]=true;});}if(cb.checked&&!cust&&V.L1==null){V.L1=V.L2=V.K1=V.K2=true;V.extra=V.extra||[];}if(cb.checked&&!V.lay&&V.mat==null)V.lay=[];refresh({editor:true});});
   ck.appendChild(cb);ck.appendChild(document.createTextNode('Lägg voter i botten'));b.appendChild(ck);
   if(!V.on){b.appendChild(el('div','small-note',cust?'Voter är diken i schaktbotten som följer insidan av sidorna mellan punkterna du ritat, även böjda sidor och rundade hörn. De grävs ut för sig och räknas som extra schakt under botten. Mitten mellan voterna är orörd botten.':'Voter är diken i schaktbotten, längs insidan av sidorna eller tvärs över grunden. De grävs ut för sig och räknas som extra schakt under botten. Mitten mellan voterna är orörd botten.'));return;}
   function numFld(o,key,label,ph){
     var w=el('label','field'),r=el('div','inp'),i=el('input');w.appendChild(el('span',null,label));i.inputMode='decimal';i.value=o[key]||'';i.placeholder=ph;i.setAttribute('aria-label','Vot, '+label+' i meter');
     i.addEventListener('input',function(){o[key]=i.value;refresh({});});r.appendChild(i);r.appendChild(el('em',null,'m'));w.appendChild(r);return w;
   }
-  function matSel(o,withSame){
-    var s=el('select');s.setAttribute('aria-label','Material i voten');
-    if(withSame){var a=el('option',null,'Samma som övriga');a.value='';s.appendChild(a);var n=el('option',null,'Ingen fyllning, öppen vot');n.value='none';s.appendChild(n);}
-    else{var n0=el('option',null,'Ingen fyllning, öppna diken');n0.value='';s.appendChild(n0);}
-    massorSorted().forEach(function(m){var op=el('option',null,m[1]);op.value=m[0];s.appendChild(op);});
-    s.value=o.mat||'';s.addEventListener('change',function(){o.mat=s.value;s.blur();refresh({editor:true});});return s;
-  }
-  function ownChk(o){
-    var l=el('label','check own-chk'),c=el('input');c.type='checkbox';c.checked=!!o.own;c.addEventListener('change',function(){o.own=c.checked;refresh({});});
-    l.appendChild(c);l.appendChild(document.createTextNode('Egna schaktmassor (köps inte in)'));return l;
+  /* Lager i voten, nerifrån och upp. Tomt tjockleksfält fyller resten upp till schaktbotten. */
+  function layUI(o,common){
+    votNorm(o,common);
+    var wrap=el('div','vot-lays');
+    o.lay.forEach(function(L,i){
+      var r=el('div','vot-layrow');r.style.cssText='margin:4px 0 8px;padding:6px;border:1px solid var(--line,#8886);border-radius:6px';
+      var s=el('select');s.setAttribute('aria-label','Material i lager '+(i+1));
+      massorSorted().forEach(function(m){var op=el('option',null,m[1]);op.value=m[0];s.appendChild(op);});
+      s.value=L.mat||'';s.addEventListener('change',function(){L.mat=s.value;s.blur();refresh({editor:true});});
+      var top=el('div','tid-row');top.appendChild(s);
+      var rm=el('button','rm','×');rm.type='button';rm.setAttribute('aria-label','Ta bort lager '+(i+1));rm.addEventListener('click',function(){o.lay.splice(i,1);refresh({editor:true});});top.appendChild(rm);r.appendChild(top);
+      var tw=el('label','field'),ti=el('div','inp'),tin=el('input');tw.appendChild(el('span',null,'Lager '+(i+1)+', tjocklek'));tin.inputMode='decimal';tin.value=L.t||'';tin.placeholder='resten';tin.setAttribute('aria-label','Tjocklek lager '+(i+1)+' i meter');
+      tin.addEventListener('input',function(){L.t=tin.value;refresh({});});ti.appendChild(tin);ti.appendChild(el('em',null,'m'));tw.appendChild(ti);r.appendChild(tw);
+      var l=el('label','check own-chk'),c=el('input');c.type='checkbox';c.checked=!!L.own;c.addEventListener('change',function(){L.own=c.checked;refresh({});});
+      l.appendChild(c);l.appendChild(document.createTextNode('Egna schaktmassor (köps inte in)'));r.appendChild(l);
+      wrap.appendChild(r);
+    });
+    /* Nytt lager läggs till genom att välja massa, inget är förvalt */
+    var add=el('select','wide-btn');add.setAttribute('aria-label',o.lay.length?'Lägg till lager ovanpå':'Välj vad voten ska fyllas med');
+    var ph=el('option',null,o.lay.length?'Lägg till lager ovanpå, välj massa':'Fyll med, välj massa');ph.value='';add.appendChild(ph);
+    massorSorted().forEach(function(m){var op=el('option',null,m[1]);op.value=m[0];add.appendChild(op);});
+    add.value='';add.addEventListener('change',function(){if(!add.value)return;o.lay.push({mat:add.value,own:layerOwn({mat:add.value}),t:''});add.blur();refresh({editor:true});});
+    wrap.appendChild(add);
+    return wrap;
   }
   /* Gemensamt för alla voter */
   b.appendChild(el('div','subhead','Gemensamt för alla voter'));
   var fs=el('div','fields');fs.appendChild(numFld(V,'w','Bredd','0,3'));fs.appendChild(numFld(V,'d','Djup under botten','0,3'));fs.appendChild(numFld(V,'abs','Eller totalt djup från marken','tomt'));b.appendChild(fs);
-  var fm=el('label','field wide');fm.appendChild(el('span',null,'Fyll voterna med'));fm.appendChild(matSel(V,false));b.appendChild(fm);
-  if(V.mat)b.appendChild(ownChk(V));
-  b.appendChild(el('div','small-note','Voten går så djupt under schaktbotten som du anger, eller ner till totalt djup från marken. Materialet fyller voten upp till schaktbotten. Lagren under Återfyllning läggs sedan ovanpå, över hela botten.'));
+  b.appendChild(el('div','subhead','Fyllning i voterna'));
+  b.appendChild(layUI(V,true));
+  b.appendChild(el('div','small-note','Voten går så djupt under schaktbotten som du anger, eller ner till totalt djup från marken. Fyll nerifrån och upp med ett eller flera lager. Skriv tjocklek för att fylla gradvis, tomt fyller resten upp till schaktbotten. Det som inte är fyllt syns blått. Lagren under Återfyllning läggs sedan ovanpå, över hela botten.'));
   /* Per vot */
   function votCard(o,title,tagTxt){
-    var card=el('div','vot-card'),hd=el('div','vot-hd');hd.appendChild(el('i','lvl-tag',tagTxt));hd.appendChild(el('b',null,title));card.appendChild(hd);
-    var fm2=el('label','field wide');fm2.appendChild(el('span',null,'Material'));fm2.appendChild(matSel(o,true));card.appendChild(fm2);
-    if(o.mat&&o.mat!=='none')card.appendChild(ownChk(o));
+    /* Menyn är ihopfälld tills man öppnar den */
+    var vkey='votc:'+f.id+':'+tagTxt,card=el('details','vot-card'),hd=el('summary','vot-hd');
+    card.open=!!app.secOpen[vkey];card.addEventListener('toggle',function(){app.secOpen[vkey]=card.open;});
+    hd.appendChild(el('i','lvl-tag',tagTxt));hd.appendChild(el('b',null,title));card.appendChild(hd);
+    votNorm(o,false);
+    var fm2=el('label','field wide');fm2.appendChild(el('span',null,'Fyllning'));
+    var ms=el('select');ms.setAttribute('aria-label','Fyllning i voten');
+    [['','Samma som övriga'],['none','Ingen fyllning, öppen vot'],['own','Egna lager']].forEach(function(x){var op=el('option',null,x[1]);op.value=x[0];ms.appendChild(op);});
+    ms.value=o.mode||'';ms.addEventListener('change',function(){o.mode=ms.value;ms.blur();refresh({editor:true});});
+    fm2.appendChild(ms);card.appendChild(fm2);
+    if(o.mode==='own')card.appendChild(layUI(o,false));
     var f2=el('div','fields');f2.appendChild(numFld(o,'w','Bredd','gemensam'));f2.appendChild(numFld(o,'d','Djup under botten','gemensam'));f2.appendChild(numFld(o,'abs','Totalt djup från marken','gemensam'));card.appendChild(f2);
     return card;
   }

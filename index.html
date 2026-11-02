@@ -238,7 +238,7 @@ details.sec[open]>summary::before{transform:rotate(90deg)}
 .pl-till{padding:4px 0;border-bottom:1px solid var(--border);font-size:13px}.pl-till-f{display:flex;gap:6px;align-items:center;margin-top:3px;flex-wrap:wrap}.pl-till-f input{width:70px}.pl-till-f em{font-style:normal;font-size:12px;color:var(--muted)}.pl-till-f select{flex:1 1 110px}
 .pl-recv .pl-till select{width:100%;margin-top:3px}.pl-egen-n{width:100%;box-sizing:border-box;margin-top:3px}.pl-egen{display:grid;grid-template-columns:84px minmax(0,1fr);gap:6px;margin-top:3px}.pl-egen select,.pl-egen input{width:100%;box-sizing:border-box}.ex-row{display:grid;grid-template-columns:minmax(0,1fr) 48px 62px 26px;gap:5px;align-items:center;margin:3px 0}.ex-row input{width:100%;box-sizing:border-box}
 .sum-sec .mline .mfld{flex:1 1 100%;display:grid;grid-template-columns:minmax(0,1fr) 84px 18px;gap:6px;align-items:center;font-size:13px;margin:1px 0}.sum-sec .mline .mfld input{width:100%;box-sizing:border-box}.sum-sec .mline .mfld select{grid-column:2/4;width:100%}
-.pl-sec{border-top:1px solid var(--border);margin-top:6px}.pl-sec>summary{padding:7px 0;font-weight:600;font-size:13px;cursor:pointer}.pl-sec-b{padding-bottom:6px}.xrem{border:1px solid var(--border);border-radius:6px;padding:6px;margin:6px 0;display:grid;gap:5px}.xrem-top{display:flex;gap:6px}.xrem-top select{flex:1;min-width:0}.xrem-q,.xrem-p{display:flex;gap:6px;align-items:center}.xrem-q input,.xrem-p input{width:78px}.xrem-q select{width:62px}.xrem em{font-style:normal;font-size:12px;color:var(--muted)}.cost-h{margin-top:6px;font-size:13px}.cost-i{font-size:12px;color:var(--muted);padding-left:8px;display:flex;gap:4px;align-items:center}.cost-n{flex:1;min-width:0}.cost-rab{width:42px;padding:2px 4px;font-size:12px}.cost-i em{font-style:normal}.cost-kr{min-width:62px;text-align:right}.pl-bil{border:1px solid var(--border);border-radius:6px;padding:4px 8px;margin:6px 0}
+.pl-sec{border-top:1px solid var(--border);margin-top:6px}.pl-sec>summary{padding:7px 0;font-weight:600;font-size:13px;cursor:pointer}.pl-sec-b{padding-bottom:6px}.live-bar{position:sticky;top:0;z-index:6;background:var(--bg);padding:6px 0 4px;margin:4px 0 6px;border-bottom:1px solid var(--border)}.live-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.live-cell{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:8px;padding:5px 6px;text-align:left;cursor:pointer;font:inherit;min-width:0}.live-cell small{display:block;color:var(--muted);font-size:11px}.live-cell b{display:block;font-size:14px;white-space:nowrap}.live-cell span{display:block;font-size:12px;color:var(--text)}.live-note{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:12px;color:var(--muted)}.live-note button{font-size:12px;padding:2px 8px}.fleet-card{border:1px solid var(--border);border-radius:6px;padding:4px 6px;margin:4px 0}.fleet-sub{display:flex;gap:6px;align-items:center;margin-top:3px;font-size:12px}.fleet-sub input{width:64px}.fleet-sub em{font-style:normal;color:var(--muted)}.xrem{border:1px solid var(--border);border-radius:6px;padding:6px;margin:6px 0;display:grid;gap:5px}.xrem-top{display:flex;gap:6px}.xrem-top select{flex:1;min-width:0}.xrem-q,.xrem-p{display:flex;gap:6px;align-items:center}.xrem-q input,.xrem-p input{width:78px}.xrem-q select{width:62px}.xrem em{font-style:normal;font-size:12px;color:var(--muted)}.cost-h{margin-top:6px;font-size:13px}.cost-i{font-size:12px;color:var(--muted);padding-left:8px;display:flex;gap:4px;align-items:center}.cost-n{flex:1;min-width:0}.cost-rab{width:42px;padding:2px 4px;font-size:12px}.cost-i em{font-style:normal}.cost-kr{min-width:62px;text-align:right}.pl-bil{border:1px solid var(--border);border-radius:6px;padding:4px 8px;margin:6px 0}
 .pl-more{margin-top:8px;background:none;border:none;padding:2px 0;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer;width:auto}.pl-paste{margin-top:4px}
 .pl-ta{width:100%;box-sizing:border-box;margin-top:6px;font-size:12px;resize:vertical}.pl-bar{display:flex;gap:6px;margin:4px 0}.pl-tbl{max-height:340px;overflow:auto;margin-top:4px}
 .pl-row{padding:5px 0;border-bottom:1px solid var(--border);font-size:13px}.pl-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.pl-n{min-width:0;overflow-wrap:anywhere}.pl-p{white-space:nowrap}
@@ -561,6 +561,7 @@ button:disabled{opacity:.45;cursor:default}
         <div class="row" id="tTonRow" hidden><span>Schaktmassor, vikt i marken</span><span id="tTon"></span></div>
         <div class="sum-card" id="haulCard" hidden></div>
         <div class="note warn" id="tNote"></div>
+        <div class="live-bar" id="liveBar" hidden></div>
         <nav class="steps sum-steps" id="sumSteps" aria-label="Steg i summeringen"></nav>
         <div class="sum-cols"><div id="sumColA"></div><div id="sumColB"></div></div><div id="sumHold" hidden></div>
         <details class="sec sum-sec" data-key="sumSur" id="secSur"><summary>Påslag på volymen<span class="sum-v" id="surSumV"></span></summary><div class="sec-body">
@@ -915,7 +916,7 @@ var RECT_LABELS={
 
 var LBL=[['size','Längd, bredd och diameter'],['depth','Djup och höjd'],['marks','Sidornas namn och vinklar'],['edges','Sidlängder på egen ritad figur'],['handles','Hörn och handtag på egen ritad figur'],['others','Namn på andra figurer'],['void','Utrymmet under röret'],['ruler','Linjalens mått'],['up','Uppför-pilen på lutande mark'],['zwalls','Väggar mellan delsträckor'],['area','Rutan med ytor'],['notes','Textrutor och pilar'],['legend','Färgförklaringen'],['hint','Hjälptexten']];
 function dimCat(d){return /^(Djup|Höjd|Ände|Överkant)/.test(d.text)?'depth':'size';}
-var app={massSur:{},buy:{},recv:{},recvX:{},tillOn:{},rab:{},mach:[],fordon:[],fordonExtra:false,xrem:[],bergOver:'',extra:[],gSlope:'',gDir:'',groundGrad:[0,0],groundSlopeDeg:0,groundDirDeg:0,ruler:false,measures:[],openWalls:[],massPack:{},ovlOn:true,ovl:{},ovlList:[],groups:{},gcount:0,selectMode:false,checked:{},secOpen:{},totalSum:0,totalAll:0,moveMode:false,dragging:false,surfTon:'12',surfVol:'8,3',moist:'normal',moistMass:{},moistSoil:{},tid:{stall:'1,5',dag:'8',bilar:'1'},figs:[],selId:null,tool:'rita',hover:null,editingLabel:false,evs:{},sur:'0',showGrid:true,colorize:false,lbl:{zwalls:true,size:true,depth:true,marks:true,edges:true,handles:true,others:true,void:true,ruler:true,up:true,hint:true,area:true,legend:true,notes:true},notes:[],noteMode:false,noteRev:0,soil:'moran',loosen:'',loadVol:'',loadTon:''};
+var app={massSur:{},buy:{},recv:{},recvX:{},tillOn:{},rab:{},mach:[],fordon:[],fordonExtra:false,lassSep:false,xrem:[],bergOver:'',extra:[],gSlope:'',gDir:'',groundGrad:[0,0],groundSlopeDeg:0,groundDirDeg:0,ruler:false,measures:[],openWalls:[],massPack:{},ovlOn:true,ovl:{},ovlList:[],groups:{},gcount:0,selectMode:false,checked:{},secOpen:{},totalSum:0,totalAll:0,moveMode:false,dragging:false,surfTon:'12',surfVol:'8,3',moist:'normal',moistMass:{},moistSoil:{},tid:{stall:'1,5',dag:'8',bilar:'1'},figs:[],selId:null,tool:'rita',hover:null,editingLabel:false,evs:{},sur:'0',showGrid:true,colorize:false,lbl:{zwalls:true,size:true,depth:true,marks:true,edges:true,handles:true,others:true,void:true,ruler:true,up:true,hint:true,area:true,legend:true,notes:true},notes:[],noteMode:false,noteRev:0,soil:'moran',loosen:'',loadVol:'',loadTon:''};
 var nextId=1,counters={};
 var TOUCH=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches),hintClosed=false;try{hintClosed=localStorage.getItem('vk-hint')==='1';}catch(e){}
 
@@ -1365,22 +1366,31 @@ function soilLoosen(){var n=num(app.loosen);if(!blank(app.loosen)&&isFinite(n)&&
 function loadVol(){return null;}
 /* Lastvikt per lass, eget värde för både massbalans och rivning. Det gäller före fordonens lastvikt. */
 function ekFields(box){
-  var ec=ekCap();
-  var tr=el('label','tid-row');tr.appendChild(el('span','tl','Lastvikt per lass'));var lt=el('input');lt.inputMode='decimal';lt.value=app.loadTon;lt.placeholder=ec&&ec.t?fmtN(ec.t):'t.ex. 18';lt.setAttribute('aria-label','Lastvikt per lass i ton');
-  lt.addEventListener('input',function(){app.loadTon=lt.value;lt.classList.toggle('bad',!blank(lt.value)&&!loadTon());updMB();renderTotals();histSchedule();});
-  tr.appendChild(lt);tr.appendChild(el('em',null,'ton'));box.appendChild(tr);
-  box.appendChild(el('div','small-note',ec&&ec.t?'Lastvikt från fordonen: '+ec.n+'. Skriver du ett eget värde ovan gäller det i stället.':'Välj fordon under Tid, eller skriv lastvikten själv. Lastvikt per fordon skriver du under Min prislista.'));
+  /* Lastvikten skrivs på fordonsraden under Tid. Här visas bara vad som gäller, med en knapp dit. */
+  var ec=ekCap(),own=num(app.loadTon),hasOwn=!blank(app.loadTon)&&isFinite(own)&&own>0;
+  var r=el('div','tid-row');r.appendChild(el('span','tl','Lastvikt per lass'));
+  r.appendChild(el('b',null,hasOwn?fmtN(own)+' ton (eget värde)':ec&&ec.t?fmtN(Math.round(ec.t*100)/100)+' ton':'inte vald'));
+  var b=el('button',null,hasOwn?'Ta bort':ec?'Ändra':'Välj fordon');b.type='button';
+  b.addEventListener('click',function(){if(hasOwn){app.loadTon='';renderTotals();histSchedule();return;}goFleet();});
+  r.appendChild(b);box.appendChild(r);
+  if(!hasOwn&&ec)box.appendChild(el('div','small-note','Från fordonen: '+ec.n+'.'));
 }
+/* Går till steg Tid och fordonslistan, där lastvikt per fordon skrivs */
+function goFleet(){setSumStep(3);var t=$('#secTid');if(t)t.open=true;var f=$('#fleetBox');if(f)f.scrollIntoView({block:'center',behavior:'smooth'});}
 /* Lastgräns för valt lastbil eller ekipage (Tid och maskin, Lastbil eller ekipage). Gränserna skriver användaren själv under Min prislista.
    Ett eget värde i Massbalans eller Rivning av ytor gäller före ekipagets. Större ekipage, till exempel bil och släp, ger större last och färre lass. */
 var HC={};
 /* Fordonen väljs under Tid (app.fordon, typ och antal). Lastvikt per lass är medelvärdet över fordonen som har en lastvikt, vägt efter antal. */
-function fordonList(){return (app.fordon||[]).filter(function(m){return m&&m.id&&hrName(m.id);}).map(function(m){var n=num(m.n);return {id:m.id,n:isFinite(n)&&n>=1?Math.round(n):1};});}
+function fordonList(){return (app.fordon||[]).filter(function(m){return m&&m.id&&hrName(m.id);}).map(function(m){var n=num(m.n),t=num(m.t);return {id:m.id,n:isFinite(n)&&n>=1?Math.round(n):1,t:!blank(m.t)&&isFinite(t)&&t>0?t:null};});}
+/* Standard lastvikt för en fordonstyp, skriven under Timpriser och lastgränser */
+function hcDefault(id){var c=HC[id];if(!c||blank(c.t))return null;var t=num(c.t);return isFinite(t)&&t>0?t:null;}
 function ekCap(){
   var FL=fordonList(),sw=0,sn=0,nm=[];
-  FL.forEach(function(f){var c=HC[f.id];if(!c)return;var t=num(c.t);if(blank(c.t)||!isFinite(t)||!(t>0))return;sw+=t*f.n;sn+=f.n;nm.push((f.n>1?f.n+' × ':'')+hrName(f.id));});
+  FL.forEach(function(f){var t=f.t!=null?f.t:hcDefault(f.id);if(t==null)return;sw+=t*f.n;sn+=f.n;nm.push((f.n>1?f.n+' × ':'')+hrName(f.id)+(f.t!=null?' (eget värde)':''));});
   return sn>0?{n:nm.join(', '),t:sw/sn,v:null}:null;
 }
+/* Blandade lass är förvalt: olika massor får köras i samma lass, så antal lass räknas på samlad vikt. Kan stängas av med app.lassSep. */
+function mixLassOn(){var T=loadTon();return !app.lassSep&&T!=null&&T>0;}
 function lassText(v){var L=loadVol();return L?' · '+Math.ceil(v/L-1e-9)+' lass':'';}
 /* Massbalans i fast mått: schakt, bank, återfyllning med egna massor och vad som blir över */
 /* Massbalans i fast mått. Matjorden hålls för sig: den ligger i upplag eller körs bort, och egen matjord som läggs tillbaka tas från den. */
@@ -2638,6 +2648,8 @@ function renderCards(){
     else if(r.t>0.05&&(rcHas||recvCat(r.fk)==='egen'))rcMiss.push(r.n);
   });
   rows.forEach(function(r){if(r.cost!=null){r.d=fmt(r.cost*vf0,0);if(!r.sub)rcSum+=r.cost;}});
+  /* Blandade lass: olika massor får köras tillsammans, så antal lass räknas på samlad vikt. Raderna visar sin andel av ett lass. */
+  if(rows.length&&mixLassOn()&&t>0){var T0=loadTon();ls=Math.ceil(t/T0-1e-9);allL=true;rows.forEach(function(r){if(!r.sub&&r.t>0)r.c=fmt(r.t/T0,1);});}
   HAUL_LAST=rows.length?{rows:rows.map(function(r){return {n:r.n,lm:r.lm||0,t:r.t||0,c:r.c,sub:!!r.sub};}),lm:lm,t:t,ls:ls,allL:allL}:null;
   if(!rows.length){hc.hidden=true;}
   else{
@@ -2654,10 +2666,11 @@ function renderCards(){
   }
   /* Att beställa totalt */
   var orows=[],ov=0,ot=0,ol=0,oAll=true,oSum=0,oPri=false,oMiss=[],vf=PL.vat?PL_MOMS:1;
-  function addO(n,v,tv,lv,cost){orows.push({n:n,a:f1(v),b:f1(tv),c:lv==null?'':lv,d:cost==null?'':fmt(cost*vf,0)});ov+=v;ot+=tv;if(lv==null)oAll=false;else ol+=lv;if(cost!=null){oSum+=cost;oPri=true;}else oMiss.push(n);}
+  function addO(n,v,tv,lv,cost){orows.push({n:n,a:f1(v),b:f1(tv),c:lv==null?'':lv,d:cost==null?'':fmt(cost*vf,0),t:tv});ov+=v;ot+=tv;if(lv==null)oAll=false;else ol+=lv;if(cost!=null){oSum+=cost;oPri=true;}else oMiss.push(n);}
   MASS_LAST=[];
   massOrder().forEach(function(A){var pc=plCost(A);if(pc)MASS_LAST.push({n:A.n+(pc.desc?', '+pc.desc:''),cost:pc.cost});addO(A.n+(pc&&pc.desc?', '+pc.desc:''),A.ord,A.t,A.lass,pc?pc.cost:null);});
   surfAgg().forEach(function(a){if(a.newTon>0)addO(a.n.replace(' under slitlager',', under')+', ny',a.newV,a.newTon,surfLass(a.newV,a.newTon),null);});
+  if(orows.length&&mixLassOn()&&ot>0){var T1=loadTon();ol=Math.ceil(ot/T1-1e-9);oAll=true;orows.forEach(function(r){if(!r.sub&&r.t>0)r.c=fmt(r.t/T1,1);});}
   var tlB=orows.length?tillagg('best',ot,oAll?ol:null):{rows:[],skip:[]};
   /* Övriga kostnader för den här ritningen, till exempel leverans: antal × pris ex moms, skrivna av användaren */
   EXTRA_LAST=[];
@@ -2668,6 +2681,7 @@ function renderCards(){
   });
   tlB.rows.forEach(function(x){orows.push({n:'Tillägg: '+x.n+', '+fmt(x.qty,x.unit==='ton'?1:0)+' '+x.unit,a:'',b:'',c:'',d:fmt(x.cost*vf,0),sub:true});oSum+=x.cost;oPri=true;TILL_LAST.push(x);});
   var onlyX0=ov<1e-9&&ot<1e-9;
+  ORD_LAST=(!orows.length||onlyX0)?null:{t:ot,ls:ol,allL:oAll};
   if(!orows.length||onlyX0)oc.hidden=true;
   else{
     var dt=0;app.figs.forEach(function(g){var e=evOf(g);if(e.duk&&e.volume!=null)dt+=e.duk.order;});
@@ -2680,9 +2694,39 @@ function renderCards(){
   }
   try{plRecv();}catch(err){if(window.console)console.error(err);}
   MISS_CARD=(typeof rcMiss!=='undefined'&&rcMiss&&!hc.hidden?rcMiss.map(function(n){return 'Mottagningsavgift, '+n;}):[]).concat(typeof rcAny!=='undefined'&&!rcAny&&!hc.hidden&&RC_FR.length?['Mottagningsavgift']:[]).concat(oc.hidden?[]:oMiss).concat((typeof tlH!=='undefined'&&tlH.skip?tlH.skip:[]).concat(typeof tlB!=='undefined'&&tlB.skip?tlB.skip:[]).map(function(n){return 'Tillägg '+n+' (antal lass saknas)';}));
-  try{renderMiss();renderCost();}catch(err){}
+  try{renderMiss();renderCost();renderLive();}catch(err){}
 }
-var MASS_LAST=[],HAUL_LAST=null;
+var MASS_LAST=[],HAUL_LAST=null,ORD_LAST=null;
+/* Rad överst i Summering som alltid syns: ton, lass och kostnad för bortkörning och beställning, oavsett vilket steg man står i */
+function renderLive(){
+  var b=$('#liveBar');if(!b)return;
+  var H=HAUL_LAST,O=ORD_LAST;
+  if(!H&&!O){b.hidden=true;b.innerHTML='';return;}
+  var D=null;try{D=costData();}catch(err){}
+  var vf=PL.vat?PL_MOMS:1;
+  b.innerHTML='';
+  var grid=el('div','live-grid');
+  function cell(title,big,sm,step){var c=el('button','live-cell');c.type='button';c.appendChild(el('small',null,title));c.appendChild(el('b',null,big));c.appendChild(el('span',null,sm));c.setAttribute('aria-label',title+': '+big+', '+sm);c.addEventListener('click',function(){setSumStep(step);});grid.appendChild(c);}
+  function lassTxt(x){return x.allL?x.ls+(x.ls===1?' lass':' lass'):'lass saknas';}
+  if(H)cell('Köra bort','ca '+fmt(H.t,1)+' ton',lassTxt(H),1);else cell('Köra bort','inget','',1);
+  if(O)cell('Beställa','ca '+fmt(O.t,1)+' ton',lassTxt(O),2);else cell('Beställa','inget','',2);
+  var tl=(H?(H.allL?H.ls:null):0),to=(O?(O.allL?O.ls:null):0);
+  if(D&&D.G.length)cell('Kostnad',fmt(D.tot*vf,0)+' kr',PL.vat?'inkl. moms':'ex moms',4);
+  else cell('Totalt',tl!=null&&to!=null?(tl+to)+' lass':'lass saknas','',3);
+  b.appendChild(grid);
+  var note=el('div','live-note'),t=loadTon(),ec=ekCap(),own=!blank(app.loadTon)&&num(app.loadTon)>0;
+  if(t){
+    note.appendChild(el('span',null,'Lass räknas med '+fmtN(Math.round(t*100)/100)+' ton per lass'+(own?' (eget värde)':ec?', '+ec.n:'')+(tl!=null&&to!=null?'. Totalt '+(tl+to)+' lass.':'.')));
+    var bt=el('button',null,'Ändra');bt.type='button';bt.addEventListener('click',goFleet);note.appendChild(bt);
+    var ml=el('label','check');var mc=el('input');mc.type='checkbox';mc.checked=!app.lassSep;
+    mc.addEventListener('change',function(){app.lassSep=!mc.checked;renderTotals();renderTid();histSchedule();});
+    ml.appendChild(mc);ml.appendChild(document.createTextNode('Blanda olika massor i samma lass'));note.appendChild(ml);
+  }else{
+    note.appendChild(el('span',null,'Antal lass saknas. Välj fordon och lastvikt.'));
+    var bv=el('button','primary','Välj fordon');bv.type='button';bv.addEventListener('click',goFleet);note.appendChild(bv);
+  }
+  b.appendChild(note);b.hidden=false;
+}
 /* Kostnadssummering under Priser: massor, mottagning, tillägg, övrigt, kapning och såg samt timkostnad för maskin, fordon och arbetare */
 /* Kostnader per grupp och post. Rabatt i procent per post (app.rab, nyckel grupp|namn) dras av efter priset. */
 function costPct(k){var v=num(app.rab&&app.rab[k]);return isFinite(v)&&v>0?Math.min(100,v):0;}
@@ -2716,7 +2760,7 @@ function renderCost(){
     g.items.forEach(function(x,xi){
       var rw=el('div','row cost-i');rw.appendChild(el('span','cost-n',x.n));
       var pi=el('input');pi.inputMode='decimal';pi.placeholder='%';pi.value=(app.rab&&app.rab[x.key])||'';pi.setAttribute('aria-label','Rabatt i procent, '+x.n);pi.className='cost-rab';
-      pi.addEventListener('input',function(){if(!app.rab)app.rab={};app.rab[x.key]=pi.value;var v=num(pi.value);pi.classList.toggle('bad',!blank(pi.value)&&!(isFinite(v)&&v>=0&&v<=100));histSchedule();renderCost();});
+      pi.addEventListener('input',function(){if(!app.rab)app.rab={};app.rab[x.key]=pi.value;var v=num(pi.value);pi.classList.toggle('bad',!blank(pi.value)&&!(isFinite(v)&&v>=0&&v<=100));histSchedule();renderCost();renderLive();});
       rw.appendChild(pi);rw.appendChild(el('em',null,'%'));var ks=el('span','cost-kr');rw.appendChild(ks);box.appendChild(rw);refs.item[gi+'.'+xi]=ks;
     });
   });
@@ -2771,11 +2815,19 @@ function tidCalc(){
   R.sawCost=R.sawP>0&&R.sawD>0?R.sawD*R.sawP:0;
   /* Lass: bortkörning av jord och matjord, rivna slitlager och inleverans av massor */
   var lass=0,any=false;
+  if(mixLassOn()){
+    var TL=loadTon(),hT=0,oT=0;
+    if(M.net>1e-6)hT+=M.tNet;if(!M.keep&&M.tsLeft>1e-6)hT+=M.tTsLeft;SA.forEach(function(a){hT+=a.t;});xremList().forEach(function(x){hT+=x.t;});
+    massOrder().forEach(function(A){oT+=A.t;});
+    if(hT>1e-9){lass+=Math.ceil(hT/TL-1e-9);any=true;}
+    if(oT>1e-9){lass+=Math.ceil(oT/TL-1e-9);any=true;}
+  }else{
   if(M.net>1e-6){var l1=lassN(M.net*(1+M.Leff/100),M.tNet);if(l1!=null){lass+=l1;any=true;}}
   if(!M.keep&&M.tsLeft>1e-6){var l2=lassN(M.tsLeft*(1+TS_LOOSEN/100),M.tTsLeft);if(l2!=null){lass+=l2;any=true;}}
   SA.forEach(function(a){if(a.lass!=null){lass+=a.lass;any=true;}});
   xremList().forEach(function(x){if(x.t>0){var lx=lassN(x.lm,x.t);if(lx!=null){lass+=lx;any=true;}}});
   massOrder().forEach(function(A){if(A.lass!=null){lass+=A.lass;any=true;}});
+  }
   R.lass=lass;R.lassKnown=any;
   R.lastMin=tidNum('lastMin')||0;R.lossMin=tidNum('lossMin')||0;R.km=tidNum('km')||0;R.kmh=tidNum('kmh')||0;/* Fordon som behövs: högst ett per lass. Fler än så är extra och räknas bara med som kostnad om användaren väljer det (app.fordonExtra). */
 var FL=fordonList(),FK=0;FL.forEach(function(f){FK+=f.n;});
@@ -2814,12 +2866,12 @@ var UNIT_SIG={};
 /* Lista med typ och antal, samma för grävmaskiner (app.mach) och fordon (app.fordon). Fordonen styr också lastvikt och antal lass. */
 function renderUnits(boxId,key,type,noneTxt,what){
   var box=$('#'+boxId);if(!box)return;
-  var sig=JSON.stringify(app[key]||[]);
+  var extra=key==='fordon'?JSON.stringify(HC):'',sig=JSON.stringify(app[key]||[])+extra;
   if(sig===UNIT_SIG[key]&&box.children.length)return;
   if(typingIn(box)&&box.children.length)return;
   UNIT_SIG[key]=sig;box.innerHTML='';
   var L=app[key]||(app[key]=[]);
-  function changed(){UNIT_SIG[key]=JSON.stringify(app[key]);renderTid();if(key==='fordon')renderTotals();histSchedule();}
+  function changed(){UNIT_SIG[key]=JSON.stringify(app[key])+extra;renderTid();if(key==='fordon')renderTotals();histSchedule();}
   if(!L.length)box.appendChild(el('div','small-note',noneTxt));
   L.forEach(function(m,i){
     var r=el('div','tid-row mach-row');
@@ -2832,7 +2884,16 @@ function renderUnits(boxId,key,type,noneTxt,what){
     q.addEventListener('input',function(){m.n=q.value;var v=num(q.value);q.classList.toggle('bad',!blank(q.value)&&!(isFinite(v)&&v>=1));changed();});
     var d=el('button','rm','×');d.type='button';d.setAttribute('aria-label','Ta bort '+what);d.title='Ta bort';
     d.addEventListener('click',function(){L.splice(i,1);UNIT_SIG[key]='';if(box.contains(document.activeElement))document.activeElement.blur();renderUnits(boxId,key,type,noneTxt,what);changed();});
-    r.appendChild(s);r.appendChild(q);r.appendChild(el('em',null,'st'));r.appendChild(d);box.appendChild(r);
+    if(key==='fordon'){
+      /* Fordon: typ och ta bort på första raden, antal och lastvikt per lass på andra. Tomt lastvikt-fält använder standardvärdet från Min prislista. */
+      var card=el('div','fleet-card');r.appendChild(s);r.appendChild(d);card.appendChild(r);
+      var sub=el('div','fleet-sub');sub.appendChild(el('span',null,'Antal'));sub.appendChild(q);sub.appendChild(el('em',null,'st'));
+      var dflt=hcDefault(m.id),lw=el('input');lw.inputMode='decimal';lw.placeholder=dflt!=null?fmtN(dflt):'ton';lw.value=m.t||'';lw.setAttribute('aria-label','Lastvikt per lass, '+what+' '+(i+1));
+      lw.addEventListener('input',function(){m.t=lw.value;var v=num(lw.value);lw.classList.toggle('bad',!blank(lw.value)&&!(isFinite(v)&&v>0));changed();});
+      sub.appendChild(el('span',null,'Lastvikt'));sub.appendChild(lw);sub.appendChild(el('em',null,'ton per lass'));card.appendChild(sub);
+      if(m.id&&dflt==null&&blank(m.t))card.appendChild(el('div','small-note','Ange lastvikt här eller som standard under Min prislista.'));
+      box.appendChild(card);
+    }else{r.appendChild(s);r.appendChild(q);r.appendChild(el('em',null,'st'));r.appendChild(d);box.appendChild(r);}
   });
 }
 function renderMach(){renderUnits('machBox','mach','grav','Ingen grävmaskin vald. Lägg till en eller flera, de kan gå samtidigt.','grävmaskin');}
@@ -2932,7 +2993,7 @@ function renderTid(){
   }
   infoNote(rs,'Tid räknas bara från ifyllda värden.','Tid räknas bara från de värden du skriver in. Kaphastigheten väljs efter asfaltens tjocklek (3,5 m/min till 4 cm, 2,5 till 6 cm, 1,5 till 9 cm, annars 1) om du inte anger egen. Ställfaktorn gäller kapningen. Lass är jord, matjord, rivet och inköpta massor.');
   $('#tidSumV').textContent=R.work>0?'ca '+fmt(R.work,1)+' h':'';
-  try{renderMiss();renderCost();}catch(err){}
+  try{renderMiss();renderCost();renderLive();}catch(err){}
 }
 /* Min prislista: användarens egna priser per massa (kr per ton, kr per m³, släpkärra, storsäck). Sparas i webbläsaren och gäller alla ritningar.
    Appen innehåller inga priser från början. Priserna skrivs direkt vid massan under Massor att beställa, eller i tabellen under Min prislista.
@@ -3237,7 +3298,7 @@ function renderPris(){
     });
     /* Timpriser för maskiner, fordon och personal. Används av Tid och maskin när du väljer maskin, bil och antal arbetare. */
     var sH=plSec('Timpriser och lastgränser');
-    infoNote(sH.body,'Timpris ex moms. Grävmaskin väljs under Tid, bil under Massbalans.','Skriv timpris ex moms för det du använder. Grävmaskin och arbetare väljer du under Tid och maskin. Lastbil eller ekipage väljer du också under Tid, med antal, och lastvikten styr antal lass.');
+    infoNote(sH.body,'Timpris ex moms och standard lastvikt per fordon.','Skriv timpris ex moms. Lastvikten är ett standardvärde per fordonstyp. Fordon, antal och lastvikt för just det här jobbet väljer du under Tid, där du kan ändra lastvikten per fordon. Lastvikten styr antal lass.');
     HRL.forEach(function(h){
       var r=el('label','tid-row');r.appendChild(el('span','tl',h[1]));
       var i=el('input');i.inputMode='decimal';i.placeholder='kr';i.value=HR[h[0]]||'';i.setAttribute('aria-label','Timpris, '+h[1]+', kr per timme ex moms');
@@ -3247,7 +3308,7 @@ function renderPris(){
       sH.body.appendChild(fr);
       if(h[2]==='bil'){
         /* Lastgräns för lastbilen eller ekipaget. Används för antal lass när den väljs under Tid och maskin. */
-        var cr=el('label','tid-row');cr.appendChild(el('span','tl','Lastvikt'));
+        var cr=el('label','tid-row');cr.appendChild(el('span','tl','Standard lastvikt'));
         var ci=el('input');ci.inputMode='decimal';ci.placeholder='ton';ci.value=(HC[h[0]]&&HC[h[0]].t)||'';ci.setAttribute('aria-label',h[1]+', lastvikt i ton');
         ci.addEventListener('input',function(){var x=num(ci.value);ci.classList.toggle('bad',!blank(ci.value)&&!(isFinite(x)&&x>0));if(!HC[h[0]])HC[h[0]]={};HC[h[0]].t=ci.value;plSave();try{renderTotals();}catch(err){}});
         cr.appendChild(ci);cr.appendChild(el('em',null,'ton'));fr.appendChild(cr);
@@ -3283,7 +3344,7 @@ function renderSurfSum(){
   var tt=0,tl=0,anyNew=false,nt=0;A.forEach(function(a){tt+=a.t;if(a.lass!=null)tl+=a.lass;if(a.newTon>0){anyNew=true;nt+=a.newTon;}});
   $('#rivSumV').textContent=A.length?'ca '+fmt(tt,1)+' ton':'';
   function res(a){return 'ca '+fmt(a.t,1)+' ton · '+fmtV(a.lm)+(a.lass!=null?' · '+a.lass+' lass':'');}
-  if(rl.contains(document.activeElement)){
+  if(typingIn(rl)){
     A.forEach(function(a){var r=rl.querySelector('[data-surf="'+a.k+'"] .mres');if(r)r.textContent=res(a);});
   }else{
     rl.innerHTML='';
@@ -3313,11 +3374,11 @@ function renderSurfSum(){
 function renderMB(){
   var box=$('#mbInfo');if(!box)return;var M=massBalance();
   $('#secMB').hidden=M.cut<1e-6&&M.bank<1e-6&&M.ts<1e-6;
-  if(box.contains(document.activeElement)){updMB();return;}
+  if(typingIn(box)){updMB();return;}
   box.innerHTML='';if(M.cut<1e-6&&M.bank<1e-6&&M.ts<1e-6)return;
   function row(lbl,id,cls){var r=el('div','row'+(cls?' '+cls:''));r.appendChild(el('span',null,lbl));var b=el('b');b.id=id;r.appendChild(b);box.appendChild(r);}
   if(M.ts>1e-6){row('Matjordsavtagning','mbTs');box.appendChild(moistRow('moistSoil','matjord','matjord'));row('Schakt under matjorden','mbCut');}else row('Schakt','mbCut');
-  Object.keys(M.bySoil).forEach(function(k){var r=el('div','row mb-sub');r.appendChild(el('span',null,'varav '+soilOf(k)[1].toLowerCase()+', '+fmtN(Math.round(soilLoosenOf(k)*10)/10)+' %'));r.appendChild(el('span',null,fmt(M.bySoil[k])+' tfm³ · ca '+fmt(M.bySoil[k]*soilDens(k),1)+' ton'));box.appendChild(r);box.appendChild(moistRow('moistSoil',soilId(k),soilOf(k)[1].toLowerCase()));});
+  Object.keys(M.bySoil).forEach(function(k){var r=el('div','row mb-sub');r.appendChild(el('span',null,'varav '+soilOf(k)[1].toLowerCase()));r.appendChild(el('span',null,fmt(M.bySoil[k])+' tfm³ · ca '+fmt(M.bySoil[k]*soilDens(k),1)+' ton'));box.appendChild(r);box.appendChild(moistRow('moistSoil',soilId(k),soilOf(k)[1].toLowerCase()));});
   if(M.bank>1e-6)row('Bank och påfyllning','mbBank');if(M.own>1e-6)row('Återfyllning med egna massor','mbOwn');
   if(M.ts>1e-6&&M.ownMat>1e-6)row('Matjord som läggs tillbaka','mbOwnMat');
   row('','mbNet','mb-net');
@@ -3328,7 +3389,7 @@ function renderMB(){
   }
   var sr=el('div','mb-soil');
   if(M.layered)sr.appendChild(el('span',null,'Övrig jord:'));
-  var sl=el('select');sl.setAttribute('aria-label','Jordart i schaktet');SOILS.forEach(function(x){if(x[0]==='matjord')return;var o=el('option',null,x[1]+' ('+fmtN(x[2])+' %)');o.value=x[0];if(x[0]===soilId(app.soil))o.selected=true;sl.appendChild(o);});
+  var sl=el('select');sl.setAttribute('aria-label','Jordart i schaktet');SOILS.forEach(function(x){if(x[0]==='matjord')return;var o=el('option',null,x[1]);o.value=x[0];if(x[0]===soilId(app.soil))o.selected=true;sl.appendChild(o);});
   sl.addEventListener('change',function(){app.soil=sl.value;app.loosen='';sl.blur();renderTotals();histSchedule();});
   var lw=el('label','mfld');lw.appendChild(document.createTextNode('Svällfaktor'));var li=el('input');li.inputMode='decimal';li.value=app.loosen;li.placeholder=fmtN(soilLoosen());li.setAttribute('aria-label','Svällfaktor i procent');
   li.addEventListener('input',function(){app.loosen=li.value;updMB();try{renderCards();renderTid();}catch(err){if(window.console)console.error(err);}histSchedule();});lw.appendChild(li);lw.appendChild(document.createTextNode('%'));
@@ -3702,13 +3763,17 @@ function fillUI(f,box){
     })(z);
     b.appendChild(zr);
   }
+  dukUI(f,b,true);
   b.appendChild(el('div','subhead','I totalen räknas'));
   b.appendChild(segEl([['all','Hela figuren'],['fill','Fyllningen'],['rest','Det som är kvar']],f.fillCount||'all',function(v){f.fillCount=v;refresh({editor:true});},'full'));
   var res=el('div','info');res.id='fillInfo';b.appendChild(res);
   b.appendChild(el('div','small-note','Vikten är ungefärlig lösvikt. Kontrollera alltid med leverantören.'));
 }
-function dukUI(f,box){
-  var D=f.duk=f.duk||{},b=sec(box,'duk','Fiberduk',!!(D.bottom||D.walls));
+/* Fiberduk. Inline: ligger synlig i Återfyllning, ovanför I totalen räknas. Annars en egen ihopfälld del. */
+function dukUI(f,box,inline){
+  var D=f.duk=f.duk||{},b;
+  if(inline){b=el('div','duk-inline');box.appendChild(b);b.appendChild(el('div','subhead','Fiberduk'));}
+  else b=sec(box,'duk','Fiberduk',!!(D.bottom||D.walls));
   [['bottom','Duk i botten'],['walls','Duk på slänter och väggar']].forEach(function(x){
     var l=el('label','check');var c=el('input');c.type='checkbox';c.checked=!!D[x[0]];c.addEventListener('change',function(){D[x[0]]=c.checked;refresh({});});
     l.appendChild(c);l.appendChild(document.createTextNode(x[1]));b.appendChild(l);});
@@ -4157,7 +4222,7 @@ function renderEditor(){
   var res2=el('div','result sub');res2.appendChild(el('span',null,'Totalt alla figurer'));res2.appendChild(el('strong')).id='edTot';
   hdr.appendChild(res2);
 
-  if(panes.fyll){fillUI(f,panes.fyll);dukUI(f,panes.fyll);}
+  if(panes.fyll){fillUI(f,panes.fyll);if(!(f.fill&&f.fill.on))dukUI(f,panes.fyll);}
   box=panes.plac;
   var bp=sec(box,'place','Placering',true);
   var fp=el('div','fields');
@@ -6508,11 +6573,11 @@ function mangdSheet(name,date){
   if(M.own>1e-6)r.push(['varav egna schaktmassor',{v:M.own},'tfm³','']);
   var MO=massOrder();
   if(MO.length){
-    var anyP=MO.some(function(A){return plCost(A);}),hd=[S('Massor att beställa'),S('Ton (ca)'),S('m³ att beställa'),S('Lass'),S('Största sten (mm)'),S('Anmärkning')];
+    var anyP=MO.some(function(A){return plCost(A);}),mixX=mixLassOn(),LTx=loadTon(),hd=[S('Massor att beställa'),S('Ton (ca)'),S('m³ att beställa'),S(mixX?'Andel av ett lass':'Lass'),S('Största sten (mm)'),S('Anmärkning')];
     if(anyP){hd.push(S('Pris ex moms (kr per ton, m³, släpkärra eller säck)'),S('Kostnad ex moms (kr)'));if(PL.vat)hd.push(S('Kostnad inkl. moms (kr)'));}
     r.push([]);r.push(hd);var rA=r.length+1;
     MO.forEach(function(A){
-      var rw=[A.n,{v:Math.round(A.t*10)/10},{v:A.ord},A.lass!=null?{v:A.lass,s:0}:'',A.dm?{v:A.dm,s:0}:'',(A.tonFirst?'Beställs per ton. ':'Beställs per m³. ')+'Packningstillägg '+fmtN(A.pack)+' %, svinn '+fmtN(A.sur)+' %.'+(A.w.length?' Kontrollera stenstorleken.':'')];
+      var rw=[A.n,{v:Math.round(A.t*10)/10},{v:A.ord},mixX?{v:Math.round(A.t/LTx*100)/100}:A.lass!=null?{v:A.lass,s:0}:'',A.dm?{v:A.dm,s:0}:'',(A.tonFirst?'Beställs per ton. ':'Beställs per m³. ')+'Packningstillägg '+fmtN(A.pack)+' %, svinn '+fmtN(A.sur)+' %.'+(A.w.length?' Kontrollera stenstorleken.':'')];
       if(anyP){var pc=plCost(A),n=r.length+1;
         if(pc){
           var fx=pc.mode==='sack'?'ROUNDUP(B'+n+',0)*G'+n:pc.mode==='karra'?'INT(B'+n+'/2)*G'+n+'+IF(B'+n+'-INT(B'+n+'/2)*2>0.000001,IF(B'+n+'-INT(B'+n+'/2)*2<=1,'+pc.lo+',G'+n+'),0)':(pc.unit==='ton'?'B':'C')+n+'*G'+n;
@@ -6522,18 +6587,20 @@ function mangdSheet(name,date){
         else rw.push('Pris saknas');}
       r.push(rw);});
     if(anyP){var rB=r.length;r.push([{v:'Summa inköp av massor',s:1},'','','','','','',{f:'SUM(H'+rA+':H'+rB+')',s:3}].concat(PL.vat?[{f:'SUM(I'+rA+':I'+rB+')',s:3}]:[]));}
+    if(mixX)r.push([{v:'Blandade lass: antal lass räknas på samlad vikt i bladet Transport.',s:5}]);
   }
-  var LT=loadTon(),rt1=function(x){return Math.round(x*10)/10;};
-  r.push([]);r.push([S('Bortforsling'),S('tfm³'),S('lm³'),S('Lass'),S('Ton (ca)'),S('Anmärkning')]);
-  if(M.net>1e-6){var lm=M.net*(1+LZ/100),ln=lassN(lm,M.tNet);r.push(['Överskott av schaktmassor',{v:M.net},{v:lm},ln!=null?{v:ln,s:0}:'',{v:rt1(M.tNet)},'Svällfaktor '+fmtN(Math.round(LZ*10)/10)+' %'+(M.layered?', vägt medel':'')+', vikt ca '+fmtN(Math.round(M.Deff*100)/100)+' t/tfm³'+(LV&&LT?(lassWhy(lm,M.tNet)==' (vikten styr)'?', lastvikten styr antal lass':', lastvolymen styr antal lass'):'')]);}
+  var LT=loadTon(),rt1=function(x){return Math.round(x*10)/10;},mixB=mixLassOn();
+  r.push([]);r.push([S('Bortforsling'),S('tfm³'),S('lm³'),S(mixB?'Andel av ett lass':'Lass'),S('Ton (ca)'),S('Anmärkning')]);
+  if(M.net>1e-6){var lm=M.net*(1+LZ/100),ln=mixB?{v:Math.round(M.tNet/LT*100)/100}:lassN(lm,M.tNet);r.push(['Överskott av schaktmassor',{v:M.net},{v:lm},mixB?ln:ln!=null?{v:ln,s:0}:'',{v:rt1(M.tNet)},'Svällfaktor '+fmtN(Math.round(LZ*10)/10)+' %'+(M.layered?', vägt medel':'')+', vikt ca '+fmtN(Math.round(M.Deff*100)/100)+' t/tfm³'+(LV&&LT?(lassWhy(lm,M.tNet)==' (vikten styr)'?', lastvikten styr antal lass':', lastvolymen styr antal lass'):'')]);}
   else if(M.net<-1e-6)r.push(['Underskott, massor att tillföra',{v:-M.net},'','','','']);
   else r.push(['Massorna går jämnt ut','','','','','']);
-  if(M.tsLeft>1e-6){var lt=M.tsLeft*(1+TS_LOOSEN/100),lnt=lassN(lt,M.tTsLeft);r.push([M.keep?'Matjord i upplag':'Matjord att köra bort',{v:M.tsLeft},{v:lt},!M.keep&&lnt!=null?{v:lnt,s:0}:'',{v:rt1(M.tTsLeft)},'Svällfaktor '+fmtN(TS_LOOSEN)+' %, vikt ca '+fmtN(M.dTs)+' t/tfm³']);}
+  if(M.tsLeft>1e-6){var lt=M.tsLeft*(1+TS_LOOSEN/100),lnt=mixB?{v:Math.round(M.tTsLeft/LT*100)/100}:lassN(lt,M.tTsLeft);r.push([M.keep?'Matjord i upplag':'Matjord att köra bort',{v:M.tsLeft},{v:lt},!M.keep&&lnt!=null?(mixB?lnt:{v:lnt,s:0}):'',{v:rt1(M.tTsLeft)},'Svällfaktor '+fmtN(TS_LOOSEN)+' %, vikt ca '+fmtN(M.dTs)+' t/tfm³']);}
+  if(mixB)r.push([{v:'Blandade lass: antal lass räknas på samlad vikt i bladet Transport.',s:5}]);
   if(LV||LT)r.push(['Lastgränser per lass',LV?{v:LV}:'',LV?'m³':'',LT?{v:LT,s:0}:'','ton','Antal lass räknas efter lastvikten'+(ekCap()&&blank(app.loadTon)?'. Lastvikten kommer från valda fordon:'+ekCap().n:'')]);
   var SA=surfAgg();
   if(SA.length){
-    r.push([]);r.push([S('Rivning av ytor'),S('Ton (ca)'),S('Bruten volym (m³)'),S('Lass'),S('Kapmeter'),S('Anmärkning')]);
-    SA.forEach(function(a){r.push([a.n+(a.cnt>1?' ('+a.cnt+' st)':''),{v:Math.round(a.t*10)/10},{v:a.lm},a.lass!=null?{v:a.lass,s:0}:'',a.kap>0?{v:Math.round(a.kap*10)/10}:'','Yta '+fmtN(Math.round(a.A*100)/100)+' m², fast volym '+fmtN(Math.round(a.V*100)/100)+' m³'+(a.newTon>0?'. Ny yta att lägga ca '+fmtN(Math.round(a.newTon*10)/10)+' ton':'')]);});
+    r.push([]);r.push([S('Rivning av ytor'),S('Ton (ca)'),S('Bruten volym (m³)'),S(mixB?'Andel av ett lass':'Lass'),S('Kapmeter'),S('Anmärkning')]);
+    SA.forEach(function(a){r.push([a.n+(a.cnt>1?' ('+a.cnt+' st)':''),{v:Math.round(a.t*10)/10},{v:a.lm},mixB?{v:Math.round(a.t/LT*100)/100}:a.lass!=null?{v:a.lass,s:0}:'',a.kap>0?{v:Math.round(a.kap*10)/10}:'','Yta '+fmtN(Math.round(a.A*100)/100)+' m², fast volym '+fmtN(Math.round(a.V*100)/100)+' m³'+(a.newTon>0?'. Ny yta att lägga ca '+fmtN(Math.round(a.newTon*10)/10)+' ton':'')]);});
     r.push(['Lastgräns för slitlager',surfTonCap()?{v:surfTonCap()}:'',surfVolCap()?{v:surfVolCap()}:'','','','ton per lass, antal lass räknas efter lastvikten']);
   }
   var pipes={},stand={},aB=0,aW=0;
@@ -6583,6 +6650,38 @@ function mangdSheet(name,date){
   }
   if(CD.G.length){r.push([]);r.push([{v:'Alla kostnader efter rabatt, ex moms',s:1},'','','',{v:Math.round(CD.tot*100)/100,s:3}]);if(PL.vat)r.push([{v:'Alla kostnader efter rabatt, inkl. moms',s:1},'','','',{f:'E'+(r.length)+'*'+PL_MOMS,s:3}]);}
   return {name:'Mängdförteckning',rows:r,widths:[32,14,16,8,16,50]};
+}
+/* Blad Transport: hur transporterna är lösta (fordon, lastvikt, blandade lass) och antal lass med formler. Ändra antal och lastvikt så räknas lassen om. */
+function transportSheet(){
+  var S=function(v){return {v:v,s:6};},FL=fordonList(),T=loadTon(),mix=mixLassOn(),H=HAUL_LAST,O=ORD_LAST,R=tidCalc();
+  if(!H&&!O&&!FL.length)return null;
+  var r=[[{v:'Transport och lass',s:4}],[{v:'Visar hur transporterna är lösta: fordon, lastvikt och antal lass. Ändra antal och lastvikt så räknas lassen om. Kostnader för fordonen ligger i bladet Tid.',s:5}],[]];
+  r.push([S('Fordon'),S('Antal'),S('Lastvikt per lass (ton)'),S('Källa'),S('Timpris (kr/tim)')]);
+  var a=r.length+1,rL=0,own=num(app.loadTon),hasOwn=!blank(app.loadTon)&&isFinite(own)&&own>0;
+  FL.forEach(function(f){var o=f.t!=null,t=o?f.t:hcDefault(f.id),p=hrGet(f.id);r.push([hrName(f.id),{v:f.n,s:0},t!=null?{v:t}:'',o?'Eget värde för jobbet':t!=null?'Standard i Min prislista':'Lastvikt saknas',p!=null?{v:p}:'']);});
+  var b=r.length;
+  if(!FL.length)r.push(['Inget fordon valt','','','','']);
+  if(hasOwn){var rO=r.length+1;r.push([{v:'Eget värde för hela jobbet, går före fordonen',s:1},'',{v:own}]);rL=r.length+1;r.push([{v:'Lastvikt per lass som räknas, ton',s:1},'',{f:'C'+rO,s:3},'Eget värde']);}
+  else if(FL.length&&T){rL=r.length+1;r.push([{v:'Lastvikt per lass som räknas, ton',s:1},'',{f:'IF(SUMIF(C'+a+':C'+b+',">0",B'+a+':B'+b+')>0,SUMPRODUCT(B'+a+':B'+b+',C'+a+':C'+b+')/SUMIF(C'+a+':C'+b+',">0",B'+a+':B'+b+'),0)',s:3},'Medelvärde över fordonen, vägt efter antal']);}
+  else r.push([{v:'Ingen lastvikt angiven, antal lass kan inte räknas.',s:5}]);
+  r.push(['Blandade lass','',mix?'Ja':'Nej',mix?'Olika massor körs i samma lass, lassen räknas på samlad vikt':'Varje massa räknas för sig, upp till hela lass']);
+  r.push([]);
+  r.push([S('Grupp'),S('Ton (ca)'),S('Antal lass'),S('Anmärkning')]);
+  var g0=r.length+1;
+  function grp(lbl,X,note){if(!X)return;var n=r.length+1;
+    r.push([lbl,{v:Math.round(X.t*10)/10},rL&&mix?{f:'ROUNDUP(B'+n+'/$C$'+rL+',0)',s:0}:X.allL?{v:X.ls,s:0}:'',note]);}
+  grp('Att köra bort',H,'Överskott, matjord, rivna ytor och extra material');
+  grp('Att beställa',O,'Inköpta massor');
+  var g1=r.length;
+  if(g1>=g0)r.push([{v:'Totalt antal lass',s:1},'',{f:'SUM(C'+g0+':C'+g1+')',s:3}]);
+  var rTot=r.length;
+  if(FL.length&&g1>=g0){
+    r.push([]);
+    var rv=r.length+1;r.push(['Fordon valda',{f:'SUM(B'+a+':B'+b+')',s:3}]);
+    r.push(['Fordon som behövs',{f:'MIN(B'+rv+',C'+rTot+')',s:3},'','Högst ett fordon per lass']);
+    r.push(['Extra fordon',{f:'MAX(0,B'+rv+'-C'+rTot+')',s:3},'',R.extraBil>0?(app.fordonExtra?'Räknas med som kostnad i bladet Tid':'Räknas inte med i kostnaden'):'']);
+  }
+  return {name:'Transport',rows:r,widths:[44,12,24,48,16]};
 }
 function exportRows(){
   var S=function(v){return {v:v,s:6};},date=new Date().toLocaleString('sv-SE'),name=$('#saveName').value.trim()||'Ritning';
@@ -6673,14 +6772,16 @@ function exportRows(){
   });
   if(order.length){
     r4.push([]);r4.push([{v:'Att beställa per massa',s:1}]);
-    r4.push([S('Massa'),S('Teoretiskt fast mått (tfm³)'),S('Packningstillägg (%)'),S('Löst mått (lm³)'),S('Svinn (%)'),S('Svinn (m³)'),S('Att beställa (m³)'),S('Lös vikt (t/m³, ca)'),S('Att beställa (ton, ca)'),S('Packad vikt (t/m³, ca)'),S('Beställs per')].concat(loadVol()||loadTon()?[S('Antal lass')]:[]));
+    r4.push([S('Massa'),S('Teoretiskt fast mått (tfm³)'),S('Packningstillägg (%)'),S('Löst mått (lm³)'),S('Svinn (%)'),S('Svinn (m³)'),S('Att beställa (m³)'),S('Lös vikt (t/m³, ca)'),S('Att beställa (ton, ca)'),S('Packad vikt (t/m³, ca)'),S('Beställs per')].concat(loadVol()||loadTon()?[S(mixLassOn()?'Andel av ett lass':'Antal lass')]:[]));
     var f0=r4.length+1;
     order.forEach(function(k){
       var a=agg[k],row=r4.length+1,mp=massSurOf(k);
-      r4.push([a.n,{v:a.v},{v:massPack(k),s:0},{f:'B'+row+'*(1+C'+row+'/100)'},{v:mp,s:0},{f:'D'+row+'*E'+row+'/100'},{f:'D'+row+'+F'+row},{v:a.d},{f:'G'+row+'*H'+row},{f:'H'+row+'*(1+C'+row+'/100)'},tonFirst(k)?'ton':'m³'].concat(loadVol()||loadTon()?[{f:(function(){var p=[];if(loadVol())p.push('ROUNDUP(G'+row+'/'+loadVol()+',0)');if(loadTon())p.push('ROUNDUP(I'+row+'/'+loadTon()+',0)');return p.length>1?'MAX('+p.join(',')+')':p[0];})(),s:0}]:[]));
+      r4.push([a.n,{v:a.v},{v:massPack(k),s:0},{f:'B'+row+'*(1+C'+row+'/100)'},{v:mp,s:0},{f:'D'+row+'*E'+row+'/100'},{f:'D'+row+'+F'+row},{v:a.d},{f:'G'+row+'*H'+row},{f:'H'+row+'*(1+C'+row+'/100)'},tonFirst(k)?'ton':'m³'].concat(loadVol()||loadTon()?[mixLassOn()?{f:'I'+row+'/'+loadTon(),s:3}:{f:(function(){var p=[];if(loadVol())p.push('ROUNDUP(G'+row+'/'+loadVol()+',0)');if(loadTon())p.push('ROUNDUP(I'+row+'/'+loadTon()+',0)');return p.length>1?'MAX('+p.join(',')+')':p[0];})(),s:0}]:[]));
     });
     var l4=r4.length;
-    r4.push([{v:'Totalt',s:1},{f:'SUM(B'+f0+':B'+l4+')',s:3},'',{f:'SUM(D'+f0+':D'+l4+')',s:3},'',{f:'SUM(F'+f0+':F'+l4+')',s:3},{f:'SUM(G'+f0+':G'+l4+')',s:3},'',{f:'SUM(I'+f0+':I'+l4+')',s:3}]);
+    var rTotal4=[{v:'Totalt',s:1},{f:'SUM(B'+f0+':B'+l4+')',s:3},'',{f:'SUM(D'+f0+':D'+l4+')',s:3},'',{f:'SUM(F'+f0+':F'+l4+')',s:3},{f:'SUM(G'+f0+':G'+l4+')',s:3},'',{f:'SUM(I'+f0+':I'+l4+')',s:3}];
+    if(mixLassOn())rTotal4.push('','','',{f:'ROUNDUP(I'+(r4.length+1)+'/'+loadTon()+',0)',s:0});
+    r4.push(rTotal4);
     r4.push([{v:'Teoretiskt fast mått (tfm³) = volymen i schaktet, räknad från ritningen. Löst mått (lm³) = fast mått × (1 + packningstillägg / 100). Att beställa = lös volym + svinn. Packad vikt = lös vikt × (1 + packningstillägg / 100).',s:5}]);
   }else r4.push(['Inga figurer är fyllda med massor.']);
   var sheets=[mangdSheet(name,date),{name:'Sammanställning',rows:r1,widths:[30,30,12,13,11,13,22,18,16,24]},{name:'Mått',rows:r2,widths:[30,40,14,8,30]}];
@@ -6701,13 +6802,15 @@ function exportRows(){
     var rDe=rr('Vikt i marken, vägt medel',{v:Math.round(M.Deff*100)/100},'t/tfm³'),rTon=rr({v:'Att köra bort, vikt (ca)',s:1},{f:'MAX(0,B'+rNet+')*B'+rDe,s:3},'ton'),rLT=0;
     if(LV)rLV=rr('Lastvolym per lass',{v:LV},'m³');
     if(loadTon())rLT=rr('Största lastvikt per lass',{v:loadTon()},'ton');
-    if(LV||rLT){var lf=[];if(LV)lf.push('ROUNDUP(B'+rBort+'/B'+rLV+',0)');if(rLT)lf.push('ROUNDUP(B'+rTon+'/B'+rLT+',0)');rr({v:'Antal lass'+(LV&&rLT?' (största av volym och vikt)':''),s:1},{f:lf.length>1?'MAX('+lf.join(',')+')':lf[0],s:3},'lass');}
+    if(mixLassOn()&&rLT)rr({v:'Andel av ett lass (blandade lass, antal lass i bladet Transport)',s:1},{f:'B'+rTon+'/B'+rLT,s:3},'lass');
+    else if(LV||rLT){var lf=[];if(LV)lf.push('ROUNDUP(B'+rBort+'/B'+rLV+',0)');if(rLT)lf.push('ROUNDUP(B'+rTon+'/B'+rLT+',0)');rr({v:'Antal lass'+(LV&&rLT?' (största av volym och vikt)':''),s:1},{f:lf.length>1?'MAX('+lf.join(',')+')':lf[0],s:3},'lass');}
     if(M.ts>1e-6){
       r6.push([]);var rOm=M.ownMat>1e-6?rr('Matjord som läggs tillbaka',{v:M.ownMat},'tfm³'):0;
       var rTl=rr({v:M.keep?'Matjord i upplag':'Matjord att köra bort',s:1},{f:'MAX(0,B'+rTs+(rOm?'-B'+rOm:'')+')',s:3},'tfm³');
       var rTu=rr('Svällfaktor matjord',{v:TS_LOOSEN,s:0},'%');var rTlm=rr({v:'Matjord, löst mått',s:1},{f:'B'+rTl+'*(1+B'+rTu+'/100)',s:3},'lm³');
       var rTt=rr({v:'Matjord, vikt (ca)',s:1},{f:'B'+rTl+'*'+M.dTs,s:3},'ton');
-      if((LV||rLT)&&!M.keep){var lf2=[];if(LV)lf2.push('ROUNDUP(B'+rTlm+'/B'+rLV+',0)');if(rLT)lf2.push('ROUNDUP(B'+rTt+'/B'+rLT+',0)');rr({v:'Antal lass matjord',s:1},{f:lf2.length>1?'MAX('+lf2.join(',')+')':lf2[0],s:3},'lass');}
+      if(mixLassOn()&&rLT&&!M.keep)rr({v:'Andel av ett lass, matjord',s:1},{f:'B'+rTt+'/B'+rLT,s:3},'lass');
+      else if((LV||rLT)&&!M.keep){var lf2=[];if(LV)lf2.push('ROUNDUP(B'+rTlm+'/B'+rLV+',0)');if(rLT)lf2.push('ROUNDUP(B'+rTt+'/B'+rLT+',0)');rr({v:'Antal lass matjord',s:1},{f:lf2.length>1?'MAX('+lf2.join(',')+')':lf2[0],s:3},'lass');}
     }
     sheets.push({name:'Massbalans',rows:r6,widths:[36,14,8]});
   }
@@ -6717,8 +6820,8 @@ function exportRows(){
     var TC=surfTonCap(),VC=surfVolCap();
     var r8=[[{v:'Rivning av ytor och slitlager',s:4}],[{v:'Vikter är förslag och kan ändras per figur. Antal lass räknas efter lastvikten. Kapmeter = längsgående snitt × längd + tvärsnitt × bredd.',s:5}],
       [S('Lastgräns per lass'),S('Värde'),S('Enhet')],['Lastvikt',TC?{v:TC}:'','ton'],[],
-      [S('Figur'),S('Slitlager'),S('Längd (m)'),S('Bredd (m)'),S('Tjocklek (m)'),S('Yta (m²)'),S('Volym, fast (m³)'),S('Vikt packad (t/m³)'),S('Vikt (ton)'),S('Vikt bruten (t/m³)'),S('Bruten volym (m³)'),S('Kapmeter (m)'),S('Antal lass'),S('Ny yta (ton)'),S('Antal plattor')]];
-    function lassF(rw){var p=[];if(VC)p.push('ROUNDUP(K'+rw+'/$B$5,0)');if(TC)p.push('ROUNDUP(I'+rw+'/$B$4,0)');return p.length?{f:p.length>1?'MAX('+p.join(',')+')':p[0],s:0}:'';}
+      [S('Figur'),S('Slitlager'),S('Längd (m)'),S('Bredd (m)'),S('Tjocklek (m)'),S('Yta (m²)'),S('Volym, fast (m³)'),S('Vikt packad (t/m³)'),S('Vikt (ton)'),S('Vikt bruten (t/m³)'),S('Bruten volym (m³)'),S('Kapmeter (m)'),S(mixLassOn()?'Andel av ett lass':'Antal lass'),S('Ny yta (ton)'),S('Antal plattor')]];
+    function lassF(rw){if(mixLassOn()&&TC)return {f:'I'+rw+'/$B$4',s:3};var p=[];if(VC)p.push('ROUNDUP(K'+rw+'/$B$5,0)');if(TC)p.push('ROUNDUP(I'+rw+'/$B$4,0)');return p.length?{f:p.length>1?'MAX('+p.join(',')+')':p[0],s:0}:'';}
     var r0=r8.length+1;
     RF.forEach(function(o){var rw=r8.length+1,S2=o.S;
       r8.push([o.f.name+(o.cu?' (egen form)':S2.quad?' (fyrhörning, medelmått)':''),OBJ[surfKindOf(o.f)].name,o.cu?'':{v:Math.round(o.Lm*1000)/1000},o.cu?'':{v:Math.round(o.Bm*1000)/1000},{v:o.H},S2.quad||o.cu?{v:Math.round(S2.A*1000)/1000}:{f:'C'+rw+'*D'+rw},{f:'F'+rw+'*E'+rw},{v:S2.dens},{f:'G'+rw+'*H'+rw},{v:S2.densBr},{f:'I'+rw+'/J'+rw},o.cu?{v:Math.round(S2.kap*10)/10}:S2.cutOn?{f:S2.cutL+'*C'+rw+'+'+S2.cutT+'*D'+rw}:{v:0},lassF(rw),S2.redo?{f:'F'+rw+'*'+S2.newT+'*H'+rw}:'',S2.pl?{v:S2.pl.n,s:0}:'']);
@@ -6728,6 +6831,7 @@ function exportRows(){
     r8.push([{v:'Totalt',s:1},'','','','',{f:'SUM(F'+r0+':F'+r1+')',s:3},{f:'SUM(G'+r0+':G'+r1+')',s:3},'',{f:'SUM(I'+r0+':I'+r1+')',s:3},'',{f:'SUM(K'+r0+':K'+r1+')',s:3},{f:'SUM(L'+r0+':L'+r1+')',s:3},lassF(rTot),{f:'SUM(N'+r0+':N'+r1+')',s:3}]);
     sheets.push({name:'Rivning',rows:r8,widths:[22,16,11,11,13,11,16,17,12,18,17,13,11,13,14]});
   }
+  var TS0=transportSheet();if(TS0)sheets.push(TS0);
   /* Blad: tid och maskin, med formler */
   if(app.figs.length){
     var TR=tidCalc(),nv=function(x){return x==null||x===0?'':{v:x};};
@@ -7008,7 +7112,7 @@ function reportHtml(){
   if(MB.cut>1e-6||MB.bank>1e-6||MB.ts>1e-6){var LZ2=MB.Leff,LV2=loadVol();
     o+='<div class="sec"><h2>Massbalans och transport</h2><table><tr><th>Post</th><th class="n">Volym</th></tr>'+(MB.ts>1e-6?'<tr><td>Matjordsavtagning</td><td class="n">'+fmt(MB.ts)+' tfm³</td></tr>':'')+'<tr><td>'+(MB.ts>1e-6?'Schakt under matjorden':'Schakt')+'</td><td class="n">'+fmt(MB.cutRest)+' tfm³</td></tr>'+(MB.layered?Object.keys(MB.bySoil).map(function(k){return '<tr><td>varav '+h(soilOf(k)[1].toLowerCase())+', '+fmtN(soilLoosenOf(k))+' % svällfaktor</td><td class="n">'+fmt(MB.bySoil[k])+' tfm³</td></tr>';}).join(''):'')+'<tr><td>Bank och påfyllning</td><td class="n">'+fmt(MB.bank)+' tfm³</td></tr><tr><td>Återfyllning med egna massor</td><td class="n">'+fmt(MB.own)+' tfm³</td></tr>'+
       '<tr class="tot"><td>'+(MB.net>=0?'Överskott att köra bort':'Underskott att tillföra')+'</td><td class="n">'+fmt(Math.abs(MB.net))+' tfm³</td></tr></table>';
-    if(MB.net>0){var lm2=MB.net*(1+LZ2/100),ln2=lassN(lm2,MB.tNet);o+='<div class="muted">Löst mått med '+fmtN(LZ2)+' % svällfaktor: <b>'+fmt(lm2)+' lm³</b>, ca <b>'+fmt(MB.tNet,1)+' ton</b>'+(ln2!=null?', ca <b>'+ln2+' lass</b>'+(LV2?' à '+fmtN(LV2)+' m³':'')+(loadTon()?' à högst '+fmtN(loadTon())+' ton':'')+lassWhy(lm2,MB.tNet):'')+'.</div>';}
+    if(MB.net>0){var lm2=MB.net*(1+LZ2/100),ln2=mixLassOn()?null:lassN(lm2,MB.tNet);o+='<div class="muted">Löst mått med '+fmtN(LZ2)+' % svällfaktor: <b>'+fmt(lm2)+' lm³</b>, ca <b>'+fmt(MB.tNet,1)+' ton</b>'+(ln2!=null?', ca <b>'+ln2+' lass</b>'+(LV2?' à '+fmtN(LV2)+' m³':'')+(loadTon()?' à högst '+fmtN(loadTon())+' ton':'')+lassWhy(lm2,MB.tNet):'')+'.</div>';}
     if(MB.tsLeft>1e-6)o+='<div class="muted">'+(MB.keep?'Matjord i upplag: ':'Matjord att köra bort: ')+'<b>'+fmt(MB.tsLeft)+' tfm³</b>, '+fmt(MB.tsLeft*(1+TS_LOOSEN/100))+' lm³, ca '+fmt(MB.tTsLeft,1)+' ton.</div>';
     o+='</div>';}
   /* Att köra bort: samma rader som kortet i Summering (överskott, matjord, rivet, extra material) */
@@ -7044,7 +7148,7 @@ function readStore(){try{var o=JSON.parse(localStorage.getItem(STORE)||'{}');ret
 function writeStore(o){try{localStorage.setItem(STORE,JSON.stringify(o));return true;}catch(e){return false;}}
 var SAVE_KEYS=['duk','soilLayers','bowl','parts','fill','fillCount','type','kind','sur','link','group','follow','countVol','surf','surfKind','name','raw','pos','rot','tilt','lift','above','nZones','nLevels','orient','points','bends','rounds','closed','useSlope','showVoid','voidRef','voidInTotal','pipeInTotal','color','sideColors'];
 function serialize(){
-  return {v:1,massSurAll:app.massSurAll,topsoilKeep:app.topsoilKeep,soil:app.soil,loosen:app.loosen,loadVol:app.loadVol,loadTon:app.loadTon,surfTon:app.surfTon,surfVol:app.surfVol,moist:app.moist,moistMass:app.moistMass,moistSoil:app.moistSoil,tid:app.tid,notes:app.notes.map(function(N){return {text:N.text,p:N.p,dx:N.dx,dy:N.dy,w:N.w};}),ovlOn:app.ovlOn,massPack:app.massPack,openWalls:app.openWalls.map(function(E){return {pts:E.pts};}),massSur:app.massSur,buy:app.buy,recv:app.recv,recvX:app.recvX,tillOn:app.tillOn,rab:app.rab,mach:app.mach,fordon:app.fordon,fordonExtra:!!app.fordonExtra,xrem:app.xrem,bergOver:app.bergOver,extra:app.extra,ground:{slope:app.gSlope,dir:app.gDir},groups:app.groups,sur:app.sur,figs:app.figs.map(function(f){var o={};SAVE_KEYS.forEach(function(k){if(f[k]!==undefined)o[k]=JSON.parse(JSON.stringify(f[k]));});
+  return {v:1,massSurAll:app.massSurAll,topsoilKeep:app.topsoilKeep,soil:app.soil,loosen:app.loosen,loadVol:app.loadVol,loadTon:app.loadTon,surfTon:app.surfTon,surfVol:app.surfVol,moist:app.moist,moistMass:app.moistMass,moistSoil:app.moistSoil,tid:app.tid,notes:app.notes.map(function(N){return {text:N.text,p:N.p,dx:N.dx,dy:N.dy,w:N.w};}),ovlOn:app.ovlOn,massPack:app.massPack,openWalls:app.openWalls.map(function(E){return {pts:E.pts};}),massSur:app.massSur,buy:app.buy,recv:app.recv,recvX:app.recvX,tillOn:app.tillOn,rab:app.rab,mach:app.mach,fordon:app.fordon,fordonExtra:!!app.fordonExtra,lassSep:!!app.lassSep,xrem:app.xrem,bergOver:app.bergOver,extra:app.extra,ground:{slope:app.gSlope,dir:app.gDir},groups:app.groups,sur:app.sur,figs:app.figs.map(function(f){var o={};SAVE_KEYS.forEach(function(k){if(f[k]!==undefined)o[k]=JSON.parse(JSON.stringify(f[k]));});
     var hi=f.host?app.figs.findIndex(function(h){return h.id===f.host;}):-1;if(hi>=0&&f.hostOff){o.hostIx=hi;o.hostOff=JSON.parse(JSON.stringify(f.hostOff));}return o;})};
 }
 function loadDrawing(d,keepView){
@@ -7079,9 +7183,9 @@ function loadDrawing(d,keepView){
   app.topsoilKeep=d.topsoilKeep!==false;
   app.massSurAll=d.massSurAll!=null?String(d.massSurAll):(d.sur&&num(d.sur)>0?String(d.sur):'');app.soil=d.soil||'moran';app.loosen=d.loosen||'';app.loadVol=d.loadVol||'';app.loadTon=d.loadTon||'';app.surfTon=d.surfTon!=null?String(d.surfTon):'12';app.surfVol=d.surfVol!=null?String(d.surfVol):'8,3';app.moist='normal';app.moistSoil={};if(d.moistSoil&&typeof d.moistSoil==='object')Object.keys(d.moistSoil).forEach(function(k){if(MOIST[d.moistSoil[k]])app.moistSoil[k]=d.moistSoil[k];});app.moistMass={};if(d.moistMass&&typeof d.moistMass==='object')Object.keys(d.moistMass).forEach(function(k){if(MOIST[d.moistMass[k]])app.moistMass[k]=d.moistMass[k];});app.tid={stall:'1,5',dag:'8',bilar:'1'};if(d.tid&&typeof d.tid==='object')Object.keys(d.tid).forEach(function(k){app.tid[k]=String(d.tid[k]);});
   app.mach=Array.isArray(d.mach)?d.mach.filter(function(m){return m&&typeof m==='object';}).map(function(m){return {id:String(m.id||''),n:String(m.n==null?'1':m.n)};}):(app.tid.resG?[{id:app.tid.resG,n:'1'}]:[]);
-  app.fordonExtra=!!d.fordonExtra;
+  app.fordonExtra=!!d.fordonExtra;app.lassSep=!!d.lassSep;
   /* Äldre ritningar: ett valt ekipage (tid.resB) och antal bilar (tid.bilar) blir en rad i fordonslistan */
-  app.fordon=Array.isArray(d.fordon)?d.fordon.filter(function(m){return m&&typeof m==='object';}).map(function(m){return {id:String(m.id||''),n:String(m.n==null?'1':m.n)};}):(app.tid.resB?[{id:app.tid.resB,n:String(num(app.tid.bilar)>=1?Math.round(num(app.tid.bilar)):1)}]:[]);
+  app.fordon=Array.isArray(d.fordon)?d.fordon.filter(function(m){return m&&typeof m==='object';}).map(function(m){return {id:String(m.id||''),n:String(m.n==null?'1':m.n),t:String(m.t==null?'':m.t)};}):(app.tid.resB?[{id:app.tid.resB,n:String(num(app.tid.bilar)>=1?Math.round(num(app.tid.bilar)):1)}]:[]);
   app.notes=Array.isArray(d.notes)?d.notes.filter(function(N){return N&&Array.isArray(N.p)&&N.p.length===3;}).map(function(N){return {text:String(N.text||''),p:N.p.map(Number),dx:+N.dx||40,dy:+N.dy||-80,w:N.w};}):[];app.noteRev++;app.noteMode=false;
   /* Äldre ritningar hade ett gemensamt påslag. Det läggs nu som eget påslag på varje figur som saknar eget. */
   var gs=d.sur!=null?num(d.sur):0;if(isFinite(gs)&&gs>0)figs.forEach(function(g){if(blank(g.sur))g.sur=String(d.sur);});

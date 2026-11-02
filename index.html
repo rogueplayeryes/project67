@@ -976,7 +976,7 @@ function createFigure(type){
   }
   if(type==='custom'){f.points=[];f.bends=[];f.rounds=[];f.closed=false;f.raw={depth:'1',angle:'1:1'};f.useSlope=false;}
   else if(type==='cone'){f.nLevels=2;f.raw={dia0:'2',d1:'1,5',dia1:'1'};}
-  else{var d=TYPES[type].defaults;Object.keys(d).forEach(function(k){f.raw[k]=typeof d[k]==='number'?fmtRaw(d[k]):d[k];});}
+  else{var d=TYPES[type].defaults;Object.keys(d).forEach(function(k){f.raw[k]=typeof d[k]==='number'?fmtRaw(d[k]):d[k];});if(type==='box'||type==='trench')f.sym=true;}
   return f;
 }
 /* Slityta som egen ritad figur med klickade hörn. pts anger hörnen (lokala koordinater), annars ritar man dem i 3D-vyn. */
@@ -1040,6 +1040,12 @@ function readLen(f,k,errors,max){
   if(n<=0){errors[k]='Skriv ett tal större än 0, till exempel 1,5.';return NaN;}
   if(n>(max||MAXLEN)){errors[k]='Värdet är för stort. Högsta tillåtna är '+(max||MAXLEN)+' m. Menar du ett mindre tal, till exempel 0,4 i stället för 40?';return NaN;}
   return n;
+}
+/* Som readLen men 0 är tillåtet, till exempel djup 0 i början av en ramp */
+function readLenZ(f,k,errors,max){
+  var n=numLen(f.raw[k]);
+  if(isFinite(n)&&n===0)return 0;
+  return readLen(f,k,errors,max);
 }
 function readNonNeg(f,k,errors){
   var n=numLen(f.raw[k]);
@@ -2065,9 +2071,9 @@ function setZoneArrays(f,cuts,deps,gs,rs,gx,rx){
 function readZoneSpec(f,E,tF,tR){
   var nz=f.nZones||0,cuts=[],deps=[],tFs=[],tRs=[],tFx=[],tRx=[];
   var gFx=readSlope(f,'gFloorX',E),gRx=readSlope(f,'gRoofX',E);
-  if(nz<2){deps=[readLen(f,'depth',E,MAXDEPTH)];tFs=[tF||0];tRs=[tR||0];tFx=[gFx];tRx=[gRx];}
+  if(nz<2){deps=[readLenZ(f,'depth',E,MAXDEPTH)];tFs=[tF||0];tRs=[tR||0];tFx=[gFx];tRx=[gRx];}
   else for(var k=0;k<nz;k++){
-    if(k<nz-1)cuts.push(readLen(f,'zt'+k,E));deps.push(k>0&&blank(f.raw['zd'+k])?null:readLen(f,'zd'+k,E,MAXDEPTH));
+    if(k<nz-1)cuts.push(readLen(f,'zt'+k,E));deps.push(k>0&&blank(f.raw['zd'+k])?null:readLenZ(f,'zd'+k,E,MAXDEPTH));
     tFs.push(blank(f.raw['zg'+k])?(tF||0):readSlope(f,'zg'+k,E));
     tRs.push(blank(f.raw['zr'+k])?(tR||0):readSlope(f,'zr'+k,E));
     tFx.push(blank(f.raw['zgx'+k])?gFx:readSlope(f,'zgx'+k,E));
@@ -2120,7 +2126,7 @@ function evalVQuad(ev,f){
   checkCuts(cuts,maxX,E);
   if(hasErr(E))return;
   if((f.nZones||0)<2&&!blank(f.raw.depth2)&&!halfTyped(f.raw.depth2)){
-    var dK2in=readLen(f,'depth2',E,MAXDEPTH);if(hasErr(E))return;
+    var dK2in=readLenZ(f,'depth2',E,MAXDEPTH);if(hasErr(E))return;
     var xK2in=(q[1][0]+q[2][0])/2;
     if(xK2in>1e-6){tFs[0]=(dK2in-deps[0])/xK2in-tRs[0];tF=tFs[0];anySlope=true;
       ev.info.push(['Fall på botten K1 → K2',fmtN(Math.round(tFs[0]*10000)/10)+' ‰ ('+fmtDeg(Math.atan(tFs[0])*180/Math.PI)+')']);}
@@ -2428,17 +2434,24 @@ function evalQuad(ev,f){
   var tR=readSlope(f,'gRoof',E),tF=readSlope(f,'gFloor',E);
   var zs=readZoneSpec(f,E,tF,tR),cuts=zs.cuts,deps=zs.deps,tFs=zs.tFs,tRs=zs.tRs,tFx=zs.tFx,tRx=zs.tRx,anySlope=tFs.concat(tRs).some(function(v){return v;}),anyX=tFx.concat(tRx).some(function(v){return v;});
   if(hasErr(E))return;
-  var q=quadFromSides(L1,L2,W1,W2);
+  /* Symmetrisk (tårtbit): kortsida 2 ligger mitt framför kortsida 1, så båda långsidorna lutar lika mycket. Längden är avståndet mellan kortsidorna. */
+  var q=f.sym?[[0,0],[L1,(W1-W2)/2],[L1,(W1+W2)/2],[0,W1]]:quadFromSides(L1,L2,W1,W2);
   if(!q){ev.error='Sidorna går inte ihop till en fyrhörning. Kontrollera längderna på långsida 2 och kortsida 2.';return;}
   if(polyArea(q)<1e-6||selfIntersects(q)){ev.error='Sidorna ger en form som korsar sig själv. Kontrollera längderna.';return;}
   var maxX=Math.max(q[1][0],q[2][0]);
   checkCuts(cuts,maxX,E);
   if(hasErr(E))return;
   if((f.nZones||0)<2&&!blank(f.raw.depth2)&&!halfTyped(f.raw.depth2)){
-    var dK2in=readLen(f,'depth2',E,MAXDEPTH);if(hasErr(E))return;
+    var dK2in=readLenZ(f,'depth2',E,MAXDEPTH);if(hasErr(E))return;
     var xK2in=(q[1][0]+q[2][0])/2;
     if(xK2in>1e-6){tFs[0]=(dK2in-deps[0])/xK2in-tRs[0];tF=tFs[0];anySlope=true;
       ev.info.push(['Fall på botten K1 → K2',fmtN(Math.round(tFs[0]*10000)/10)+' ‰ ('+fmtDeg(Math.atan(tFs[0])*180/Math.PI)+')']);}
+  }
+  /* Djup i varje hörn: ett eller flera hörn kan höjas eller sänkas för sig. Tomt hörn följer övriga mått. Botten blir en yta mellan hörnen. */
+  var CDk=['c11','c21','c22','c12'],CDv=null;
+  if((f.nZones||0)<2&&CDk.some(function(k){return !blank(f.raw[k]);})){
+    CDv=CDk.map(function(k){if(blank(f.raw[k])||halfTyped(f.raw[k]))return null;return readLenZ(f,k,E,MAXDEPTH);});
+    if(hasErr(E))return;
   }
   var minx=Infinity,maxx=-Infinity,minz=Infinity,maxz=-Infinity;
   q.forEach(function(p){minx=Math.min(minx,p[0]);maxx=Math.max(maxx,p[0]);minz=Math.min(minz,p[1]);maxz=Math.max(maxz,p[1]);});
@@ -2470,9 +2483,16 @@ function evalQuad(ev,f){
   if(hasErr(E))return;
   function partOf(z,zz){var L=PP[z];for(var j=0;j<L.length;j++)if(zz<=L[j].zhi+1e-9)return L[j];return L[L.length-1];}
   function roofP(z,P,x,zz){return TT.mx*x+TT.mz*zz+TT.c+P.Ra+(x-ZP.st[z])*P.tR+(zz-P.zref)*P.tRx;}
-  function floorP(z,P,x,zz){return TT.mx*x+TT.mz*zz+TT.c+P.Fa-(x-ZP.st[z])*P.tF-(zz-P.zref)*P.tFx;}
+  var twist=null,twistFlip=false;
+  function floorP(z,P,x,zz){return TT.mx*x+TT.mz*zz+TT.c+P.Fa-(x-ZP.st[z])*P.tF-(zz-P.zref)*P.tFx-(twist?twist(x,zz):0);}
   function roof(z,x,zz){return roofP(z,partOf(z,zz),x,zz);}
   function floorY(z,x,zz){return floorP(z,partOf(z,zz),x,zz);}
+  /* Hörnens djup läggs som en jämn yta (bilinjär) över botten: skillnaden mot övriga mått växer från noll i de hörn som är tomma */
+  if(CDv){
+    var dl=CDv.map(function(v,i){return v==null?0:v-(roof(0,q[i][0],q[i][1])-floorY(0,q[i][0],q[i][1]));});
+    twistFlip=Math.abs(dl[1])+Math.abs(dl[3])<Math.abs(dl[0])+Math.abs(dl[2])-1e-9;
+    twist=function(x,zz){var u=(x-minx)/((maxx-minx)||1),v=(zz-minz)/((maxz-minz)||1);return (1-u)*(1-v)*dl[0]+u*(1-v)*dl[1]+u*v*dl[2]+(1-u)*v*dl[3];};
+  }
   var dmax=Math.max.apply(null,deps),s=clamp(Math.max(L1,W1,dmax)*0.07,0.15,3);
   var V=0,solids=[],zsol=[],allTop=[];
   for(var z=0;z<deps.length;z++){
@@ -2482,8 +2502,13 @@ function evalQuad(ev,f){
     for(var pj=0;pj<PP[z].length;pj++){
       var PZ=PP[z][pj],ctg=PZ.crown?'crown':'cut',c3=clipHalf(dd0.poly,dd0.tags,PZ.zlo,true,1,ctg),c4=clipHalf(c3.poly,c3.tags,PZ.zhi,false,1,ctg);
       var dd=dedupeTagged(c4.poly,c4.tags);if(dd.poly.length<3)continue;
+      /* Vridna hörn: botten delas längs den diagonal som har minst höjdskillnad i ändpunkterna, så att ett ensamt ändrat hörn bara knäcker ena halvan */
+      if(twist&&twistFlip&&dd.poly.length===4){
+        var r0=-1;dd.poly.forEach(function(p,i){if(Math.abs(p[0]-q[1][0])<1e-9&&Math.abs(p[1]-q[1][1])<1e-9)r0=i;});
+        if(r0>0)dd={poly:dd.poly.slice(r0).concat(dd.poly.slice(0,r0)),tags:dd.tags.slice(r0).concat(dd.tags.slice(0,r0))};
+      }
       var base=dd.poly.map(function(v){return [v[0],floorP(z,PZ,v[0],v[1]),v[1]];});
-      for(var b0=0;b0<base.length;b0++)if(base[b0][1]>=roofP(z,PZ,base[b0][0],base[b0][2])-1e-6){ev.error='Schaktbotten når upp till markytan'+(PP[z].length>1?' i del '+(z+1)+String.fromCharCode(97+pj):'')+'. Minska lutningen eller öka djupet.';return;}
+      for(var b0=0;b0<base.length;b0++)if(base[b0][1]>roofP(z,PZ,base[b0][0],base[b0][2])+1e-6){ev.error='Schaktbotten når upp till markytan'+(PP[z].length>1?' i del '+(z+1)+String.fromCharCode(97+pj):'')+'. Minska lutningen eller öka djupet.';return;}
       var top=loftToPlane(base,dd.tags.map(cotOf),{mx:TT.mx+PZ.tR,mz:TT.mz+PZ.tRx,c:TT.c+PZ.Ra-ZP.st[z]*PZ.tR-PZ.zref*PZ.tRx});
       if(top.some(function(p){return !isFinite(p[0])||!isFinite(p[1])||!isFinite(p[2]);})){ev.error='Vinklarna ger ingen giltig form. Kontrollera släntlutningar och lutningar.';return;}
       var pv=meshVolume([top,base]);V+=pv;
@@ -2504,6 +2529,7 @@ function evalQuad(ev,f){
     if(PP[z][0].crown){var pc=sh([xm,zc]),yrc=roof(z,xm,zc),yfc=floorY(z,xm,zc);ev.dims.push(dim([pc[0],yrc,pc[1]],[pc[0],yfc,pc[1]],[0,0,0],'Djup '+fmtM(yrc-yfc)+' mitt'));}
   }
   if(!solids.length){ev.error='Figuren kunde inte delas upp i delsträckor. Kontrollera zonernas längder.';return;}
+  if(!(V>1e-9)){ev.error='Skriv ett djup större än 0 i minst en punkt.';return;}
   /* Voter i botten: extra volym under schaktbotten, ritas i 3D men ingår inte i väggar, fyllning eller delsträckor */
   V+=votApply(ev,votBuild(f,q,tags0,function(x,zz){return floorY(zoneAt(x),x,zz);},sh3),s);
   for(var i=0;i<4;i++){
@@ -2525,6 +2551,10 @@ function evalQuad(ev,f){
     ev.info.push([f.above?'Storlek vid marken (ca)':'Storlek i markytan (ca)',fmtN(tx1-tx0)+' × '+fmtM(tz1-tz0)]);
   var xK2=(q[1][0]+q[2][0])/2,zK2=(q[1][1]+q[2][1])/2,dK2=roof(deps.length-1,xK2,zK2)-floorY(deps.length-1,xK2,zK2);
   ev.depth=Math.max(dmax,dK2);
+  if(CDv){
+    var cd=q.map(function(p){return roof(0,p[0],p[1])-floorY(0,p[0],p[1]);});ev.depth=Math.max(ev.depth,Math.max.apply(null,cd));
+    ev.info.push(['Djup i hörnen','K1 L1 '+fmtM(Math.round(cd[0]*1000)/1000)+', K2 L1 '+fmtM(Math.round(cd[1]*1000)/1000)+', K2 L2 '+fmtM(Math.round(cd[2]*1000)/1000)+', K1 L2 '+fmtM(Math.round(cd[3]*1000)/1000)]);
+  }
   if(anySlope||anyX){ev.info.push(['Djup vid kortsida 1 (mitten)',fmtM(roof(0,0,zc)-floorY(0,0,zc))]);ev.info.push(['Djup vid kortsida 2 (mitten)',fmtM(dK2)]);}
   if(anyX){ev.info.push(['Djup vid långsida 1 (vid K1)',fmtM(roof(0,0,0)-floorY(0,0,0))]);ev.info.push(['Djup vid långsida 2 (vid K1)',fmtM(roof(0,q[3][0],q[3][1])-floorY(0,q[3][0],q[3][1]))]);}
   if(deps.length>1)ev.info.push(['Antal delsträckor',String(deps.length)]);
@@ -3894,14 +3924,23 @@ function segEl(opts,cur,onPick,cls){
 function zonesUI(f,body,DW){
   if((f.nZones||0)<2){
     var fd=el('div');
-    fd.appendChild(el('div','zhelp',DW+'et anges under Sidor. Ändras '+DW.toLowerCase()+'et i steg längs figuren kan du dela upp den i delsträckor.'));
-    var zb=el('button','wide-btn',f.above?'Olika höjd i olika delsträckor':'Olika djup i olika delsträckor');
-    zb.addEventListener('click',function(){
+    fd.appendChild(el('div','zhelp','Dela upp figuren i delar som kan ha olika '+DW.toLowerCase()+' och lutning. Tills du delar anges '+DW.toLowerCase()+'et under Sidor.'));
+    var sr0=el('div','build-row split-row');
+    var b1=el('button',null,'Dela på längden');b1.title='Delsträckor efter varandra, från kortsida 1 mot kortsida 2';
+    b1.addEventListener('click',function(){
       var L=num(f.raw.length),half=isFinite(L)?Math.round(L/2*10)/10:1;
       setZoneArrays(f,[fmtRaw(half)],[f.raw.depth,'']);f.parts=[];delete f.raw.depth2;
       refresh({editor:true});
     });
-    fd.appendChild(zb);body.appendChild(fd);
+    sr0.appendChild(b1);
+    if(TYPES[f.type].quad){
+      var b2=el('button',null,'Dela på bredden');b2.title='Delar bredvid varandra, från långsida 1 mot långsida 2';
+      b2.addEventListener('click',function(){splitZoneWidth(f,0);});sr0.appendChild(b2);
+      var np0=f.parts&&f.parts[0]&&f.parts[0].items?f.parts[0].items.length+1:1;
+      if(np0>1){fd.appendChild(el('div','part-head','Del 1a (närmast långsida 1)'));partCards(f,0,fd,DW);}
+    }
+    fd.insertBefore(sr0,fd.children[1]);
+    body.appendChild(fd);
     return;
   }
   var pr=el('div','prof');pr.id='zoneProf';body.appendChild(pr);
@@ -3922,7 +3961,10 @@ function zonesUI(f,body,DW){
     rm.addEventListener('click',function(){
       var za=zoneArrays(f);
       if(k<za.deps.length-1){za.cuts.splice(k,1);}else{za.cuts.splice(k-1,1);}
+      var dGone=za.deps[k];
       za.deps.splice(k,1);za.gs.splice(k,1);za.rs.splice(k,1);za.gx.splice(k,1);za.rx.splice(k,1);if(f.parts)f.parts.splice(k,1);
+      /* Första delsträckan måste ha eget djup. Är det tomt (fortsätter) tas den borttagna delsträckans djup, annars försvinner figuren. */
+      if(blank(za.deps[0]))za.deps[0]=!blank(dGone)?dGone:(blank(f.raw.depth)?'1':f.raw.depth);
       if(za.deps.length<2){f.raw.depth=za.deps[0];f.nZones=0;for(var q=0;q<20;q++){delete f.raw['zg'+q];delete f.raw['zr'+q];delete f.raw['zgx'+q];delete f.raw['zrx'+q];}}
       else setZoneArrays(f,za.cuts,za.deps,za.gs,za.rs,za.gx,za.rx);
       refresh({editor:true});
@@ -4048,7 +4090,7 @@ function fillUI(f,box){
   if(((f.nZones||0)>=2||anyPart)&&(TYPES[f.type].quad||TYPES[f.type].vquad)){
     b.appendChild(el('div','subhead',anyPart?'Delsträckor och delar som ska fyllas':'Delsträckor som ska fyllas'));
     var zr=el('div','zone-checks');
-    for(var z=0;z<f.nZones;z++)(function(z){
+    for(var z=0;z<Math.max(f.nZones||0,1);z++)(function(z){
       var np=fparts[z]||1;
       if(np<=1){
         var l=el('label','check');var c=el('input');c.type='checkbox';c.checked=!(f.fill.zones&&f.fill.zones[z]===false);
@@ -4066,6 +4108,7 @@ function fillUI(f,box){
     })(z);
     b.appendChild(zr);
   }
+  votFillUI(f,b,true);
   dukUI(f,b,true);
   b.appendChild(el('div','subhead','I totalen räknas'));
   b.appendChild(segEl([['all','Hela figuren'],['fill','Fyllningen'],['rest','Det som är kvar']],f.fillCount||'all',function(v){f.fillCount=v;refresh({editor:true});},'full'));
@@ -4081,6 +4124,70 @@ function votTags(f){
   ol.tags.forEach(function(t){if(t&&!seen[t]){seen[t]=1;out.push(t);}});
   return out;
 }
+/* Sidor som kan få vot: fyra sidor i grop och ledningsgrav, annars varje sida och rundat hörn i en ritad figur. [nyckel, namn, kort tagg] */
+function votSides(f){
+  return f.type==='custom'?votTags(f).map(function(t){return [t,t,t.replace(/^(Sida|Hörn) /,'')];}):[['L1','Långsida 1','L1'],['L2','Långsida 2','L2'],['K1','Kortsida 1','K1'],['K2','Kortsida 2','K2']];
+}
+function votSel(f){var V=f.vot||{};return f.type==='custom'?(V.cs||{}):V;}
+/* Lager i voten, nerifrån och upp. Tomt tjockleksfält fyller resten upp till schaktbotten. */
+function votLayUI(o,common){
+  votNorm(o,common);
+  var wrap=el('div','vot-lays');
+  o.lay.forEach(function(L,i){
+    var r=el('div','vot-layrow');r.style.cssText='margin:4px 0 8px;padding:6px;border:1px solid var(--line,#8886);border-radius:6px';
+    var s=el('select');s.setAttribute('aria-label','Material i lager '+(i+1));
+    massorSorted().forEach(function(m){var op=el('option',null,m[1]);op.value=m[0];s.appendChild(op);});
+    s.value=L.mat||'';s.addEventListener('change',function(){L.mat=s.value;s.blur();refresh({editor:true});});
+    var top=el('div','tid-row');top.appendChild(s);
+    var rm=el('button','rm','×');rm.type='button';rm.setAttribute('aria-label','Ta bort lager '+(i+1));rm.addEventListener('click',function(){o.lay.splice(i,1);refresh({editor:true});});top.appendChild(rm);r.appendChild(top);
+    var tw=el('label','field'),ti=el('div','inp'),tin=el('input');tw.appendChild(el('span',null,'Lager '+(i+1)+', tjocklek'));tin.inputMode='decimal';tin.value=L.t||'';tin.placeholder='resten';tin.setAttribute('aria-label','Tjocklek lager '+(i+1)+' i meter');
+    tin.addEventListener('input',function(){L.t=tin.value;refresh({});});ti.appendChild(tin);ti.appendChild(el('em',null,'m'));tw.appendChild(ti);r.appendChild(tw);
+    var l=el('label','check own-chk'),c=el('input');c.type='checkbox';c.checked=!!L.own;c.addEventListener('change',function(){L.own=c.checked;refresh({});});
+    l.appendChild(c);l.appendChild(document.createTextNode('Egna schaktmassor (köps inte in)'));r.appendChild(l);
+    wrap.appendChild(r);
+  });
+  /* Nytt lager läggs till genom att välja massa, inget är förvalt */
+  var add=el('select','wide-btn');add.setAttribute('aria-label',o.lay.length?'Lägg till lager ovanpå':'Välj vad voten ska fyllas med');
+  var ph=el('option',null,o.lay.length?'Lägg till lager ovanpå, välj massa':'Fyll med, välj massa');ph.value='';add.appendChild(ph);
+  massorSorted().forEach(function(m){var op=el('option',null,m[1]);op.value=m[0];add.appendChild(op);});
+  add.value='';add.addEventListener('change',function(){if(!add.value)return;o.lay.push({mat:add.value,own:layerOwn({mat:add.value}),t:''});add.blur();refresh({editor:true});});
+  wrap.appendChild(add);
+  return wrap;
+}
+/* Fyllning av voterna, egen meny under Återfyllning: gemensamma lager och, om man vill, egna lager per vot */
+function votFillUI(f,box,inline){
+  var V=f.vot;if(!V||!V.on)return;
+  var b;
+  if(inline){b=el('div','duk-inline');box.appendChild(b);b.appendChild(el('div','subhead','Fyll voterna'));}
+  else b=sec(box,'votfill','Fyll voterna',false);
+  b.appendChild(el('div','small-note','Fyll nerifrån och upp med ett eller flera lager. Skriv tjocklek för att fylla gradvis, tomt fyller resten upp till schaktbotten. Det som inte är fyllt syns blått. Lagren under Återfyllning läggs sedan ovanpå, över hela botten.'));
+  b.appendChild(el('div','subhead','Alla voter'));
+  b.appendChild(votLayUI(V,true));
+  V.o=V.o||{};
+  function card(o,title,tagTxt){
+    votNorm(o,false);
+    var key='votf:'+f.id+':'+tagTxt,d=el('details','vot-card'),hd=el('summary','vot-hd');
+    d.open=!!app.secOpen[key];d.addEventListener('toggle',function(){app.secOpen[key]=d.open;});
+    hd.appendChild(el('i','lvl-tag',tagTxt));hd.appendChild(el('b',null,title));d.appendChild(hd);
+    var fm=el('label','field wide');fm.appendChild(el('span',null,'Fyllning'));
+    var ms=el('select');ms.setAttribute('aria-label','Fyllning i voten');
+    [['','Samma som övriga'],['none','Ingen fyllning, öppen vot'],['own','Egna lager']].forEach(function(x){var op=el('option',null,x[1]);op.value=x[0];ms.appendChild(op);});
+    ms.value=o.mode||'';ms.addEventListener('change',function(){o.mode=ms.value;ms.blur();refresh({editor:true});});
+    fm.appendChild(ms);d.appendChild(fm);
+    if(o.mode==='own')d.appendChild(votLayUI(o,false));
+    return d;
+  }
+  var SEL=votSel(f),any=false;
+  votSides(f).forEach(function(x){
+    if(!SEL[x[0]])return;if(!V.o[x[0]])V.o[x[0]]={};
+    if(!any){b.appendChild(el('div','subhead','Egen fyllning per vot'));any=true;}
+    b.appendChild(card(V.o[x[0]],'Vot '+x[1].toLowerCase(),x[2]));
+  });
+  (V.extra||[]).forEach(function(x,i){
+    if(!any){b.appendChild(el('div','subhead','Egen fyllning per vot'));any=true;}
+    b.appendChild(card(x,'Eget dike '+(i+1),String(i+1)));
+  });
+}
 function votUI(f,b){
   var V=f.vot=f.vot||{on:false};
   var ck=el('label','check'),cb=el('input');cb.type='checkbox';cb.checked=!!V.on;
@@ -4092,59 +4199,25 @@ function votUI(f,b){
     var w=el('label','field'),r=el('div','inp'),i=el('input');w.appendChild(el('span',null,label));i.inputMode='decimal';i.value=o[key]||'';i.placeholder=ph;i.setAttribute('aria-label','Vot, '+label+' i meter');
     i.addEventListener('input',function(){o[key]=i.value;refresh({});});r.appendChild(i);r.appendChild(el('em',null,'m'));w.appendChild(r);return w;
   }
-  /* Lager i voten, nerifrån och upp. Tomt tjockleksfält fyller resten upp till schaktbotten. */
-  function layUI(o,common){
-    votNorm(o,common);
-    var wrap=el('div','vot-lays');
-    o.lay.forEach(function(L,i){
-      var r=el('div','vot-layrow');r.style.cssText='margin:4px 0 8px;padding:6px;border:1px solid var(--line,#8886);border-radius:6px';
-      var s=el('select');s.setAttribute('aria-label','Material i lager '+(i+1));
-      massorSorted().forEach(function(m){var op=el('option',null,m[1]);op.value=m[0];s.appendChild(op);});
-      s.value=L.mat||'';s.addEventListener('change',function(){L.mat=s.value;s.blur();refresh({editor:true});});
-      var top=el('div','tid-row');top.appendChild(s);
-      var rm=el('button','rm','×');rm.type='button';rm.setAttribute('aria-label','Ta bort lager '+(i+1));rm.addEventListener('click',function(){o.lay.splice(i,1);refresh({editor:true});});top.appendChild(rm);r.appendChild(top);
-      var tw=el('label','field'),ti=el('div','inp'),tin=el('input');tw.appendChild(el('span',null,'Lager '+(i+1)+', tjocklek'));tin.inputMode='decimal';tin.value=L.t||'';tin.placeholder='resten';tin.setAttribute('aria-label','Tjocklek lager '+(i+1)+' i meter');
-      tin.addEventListener('input',function(){L.t=tin.value;refresh({});});ti.appendChild(tin);ti.appendChild(el('em',null,'m'));tw.appendChild(ti);r.appendChild(tw);
-      var l=el('label','check own-chk'),c=el('input');c.type='checkbox';c.checked=!!L.own;c.addEventListener('change',function(){L.own=c.checked;refresh({});});
-      l.appendChild(c);l.appendChild(document.createTextNode('Egna schaktmassor (köps inte in)'));r.appendChild(l);
-      wrap.appendChild(r);
-    });
-    /* Nytt lager läggs till genom att välja massa, inget är förvalt */
-    var add=el('select','wide-btn');add.setAttribute('aria-label',o.lay.length?'Lägg till lager ovanpå':'Välj vad voten ska fyllas med');
-    var ph=el('option',null,o.lay.length?'Lägg till lager ovanpå, välj massa':'Fyll med, välj massa');ph.value='';add.appendChild(ph);
-    massorSorted().forEach(function(m){var op=el('option',null,m[1]);op.value=m[0];add.appendChild(op);});
-    add.value='';add.addEventListener('change',function(){if(!add.value)return;o.lay.push({mat:add.value,own:layerOwn({mat:add.value}),t:''});add.blur();refresh({editor:true});});
-    wrap.appendChild(add);
-    return wrap;
-  }
   /* Gemensamt för alla voter */
   b.appendChild(el('div','subhead','Gemensamt för alla voter'));
   var fs=el('div','fields');fs.appendChild(numFld(V,'w','Bredd','0,3'));fs.appendChild(numFld(V,'d','Djup under botten','0,3'));fs.appendChild(numFld(V,'abs','Eller totalt djup från marken','tomt'));b.appendChild(fs);
-  b.appendChild(el('div','subhead','Fyllning i voterna'));
-  b.appendChild(layUI(V,true));
-  b.appendChild(el('div','small-note','Voten går så djupt under schaktbotten som du anger, eller ner till totalt djup från marken. Fyll nerifrån och upp med ett eller flera lager. Skriv tjocklek för att fylla gradvis, tomt fyller resten upp till schaktbotten. Det som inte är fyllt syns blått. Lagren under Återfyllning läggs sedan ovanpå, över hela botten.'));
+  b.appendChild(el('div','small-note','Voten går så djupt under schaktbotten som du anger, eller ner till totalt djup från marken. Fyllning av voterna väljs under Återfyllning, i Fyll voterna.'));
   /* Per vot */
   function votCard(o,title,tagTxt){
     /* Menyn är ihopfälld tills man öppnar den */
     var vkey='votc:'+f.id+':'+tagTxt,card=el('details','vot-card'),hd=el('summary','vot-hd');
     card.open=!!app.secOpen[vkey];card.addEventListener('toggle',function(){app.secOpen[vkey]=card.open;});
     hd.appendChild(el('i','lvl-tag',tagTxt));hd.appendChild(el('b',null,title));card.appendChild(hd);
-    votNorm(o,false);
-    var fm2=el('label','field wide');fm2.appendChild(el('span',null,'Fyllning'));
-    var ms=el('select');ms.setAttribute('aria-label','Fyllning i voten');
-    [['','Samma som övriga'],['none','Ingen fyllning, öppen vot'],['own','Egna lager']].forEach(function(x){var op=el('option',null,x[1]);op.value=x[0];ms.appendChild(op);});
-    ms.value=o.mode||'';ms.addEventListener('change',function(){o.mode=ms.value;ms.blur();refresh({editor:true});});
-    fm2.appendChild(ms);card.appendChild(fm2);
-    if(o.mode==='own')card.appendChild(layUI(o,false));
     var f2=el('div','fields');f2.appendChild(numFld(o,'w','Bredd','gemensam'));f2.appendChild(numFld(o,'d','Djup under botten','gemensam'));f2.appendChild(numFld(o,'abs','Totalt djup från marken','gemensam'));card.appendChild(f2);
     return card;
   }
   b.appendChild(el('div','subhead',cust?'Mellan punkterna':'Längs insidan av sidorna'));
   var sc=el('div','zone-checks');
   /* Egen figur: en vot per sida mellan två punkter (och per rundat hörn), annars de fyra sidorna */
-  var SIDES=cust?votTags(f).map(function(t){return [t,t,t.replace(/^(Sida|Hörn) /,'')];}):[['L1','Långsida 1','L1'],['L2','Långsida 2','L2'],['K1','Kortsida 1','K1'],['K2','Kortsida 2','K2']];
+  var SIDES=votSides(f);
   if(cust)V.cs=V.cs||{};
-  var SEL=cust?V.cs:V;
+  var SEL=votSel(f);
   SIDES.forEach(function(x){
     var l=el('label','check'),c=el('input');c.type='checkbox';c.checked=!!SEL[x[0]];c.addEventListener('change',function(){SEL[x[0]]=c.checked;refresh({editor:true});});
     l.appendChild(c);l.appendChild(el('i','lvl-tag',x[2]));l.appendChild(document.createTextNode(x[1]));sc.appendChild(l);
@@ -4440,17 +4513,36 @@ function renderEditor(){
     var qp=el('div','prof');qp.id='quadPlan';b1.appendChild(qp);
     var fq=el('div','fields');
     var isT=t==='trench';
-    fq.appendChild(fieldEl(f,'length',isT?'Längd':'Långsida 1','m',false,'L1'));
-    var l2=fieldEl(f,'length2',isT?'Längd, andra sidan':'Långsida 2','m',false,'L2');l2.querySelector('input').placeholder='samma';fq.appendChild(l2);
+    var symOn=!isV&&!!f.sym;
+    fq.appendChild(fieldEl(f,'length',symOn?'Längd mellan kortsidorna':(isT?'Längd':'Långsida 1'),'m',false,symOn?'':'L1'));
+    if(!symOn){var l2=fieldEl(f,'length2',isT?'Längd, andra sidan':'Långsida 2','m',false,'L2');l2.querySelector('input').placeholder='samma';fq.appendChild(l2);}
     fq.appendChild(fieldEl(f,'width',isT?'Bottenbredd vid start':'Kortsida 1','m',false,'K1'));
     var w2=fieldEl(f,'width2',isT?'Bottenbredd vid slut':'Kortsida 2','m',false,'K2');w2.querySelector('input').placeholder='samma';fq.appendChild(w2);
     b1.appendChild(fq);
+    if(!isV){
+      var sk=el('label','check'),sc2=el('input');sc2.type='checkbox';sc2.checked=!!f.sym;
+      sc2.addEventListener('change',function(){f.sym=sc2.checked;refresh({editor:true});});
+      sk.appendChild(sc2);sk.appendChild(document.createTextNode('Symmetrisk (tårtbit): kortsida 2 ligger mitt framför kortsida 1'));b1.appendChild(sk);
+    }
     if((f.nZones||0)<2){
       var fdp=el('div','fields');
       var DWs=f.above?'Höjd':'Schaktdjup';
       fdp.appendChild(fieldEl(f,'depth',DWs+' vid start','m',false,'K1'));
       var dk2=fieldEl(f,'depth2',DWs+' vid slut','m',false,'K2');dk2.querySelector('input').placeholder='samma';fdp.appendChild(dk2);
       b1.appendChild(fdp);
+      /* Djup i varje hörn, synligt direkt under djupet: höj eller sänk ett hörn för sig */
+      if(!isV){
+        b1.appendChild(el('div','subhead',DW+' i varje hörn'));
+        var fc=el('div','fields');
+        [['c11','Kortsida 1, långsida 1'],['c21','Kortsida 2, långsida 1'],['c12','Kortsida 1, långsida 2'],['c22','Kortsida 2, långsida 2']].forEach(function(c){
+          var cf=fieldEl(f,c[0],c[1],'m',false);cf.querySelector('input').placeholder='som övriga';fc.appendChild(cf);
+        });
+        b1.appendChild(fc);
+        b1.appendChild(el('div','small-note','Skriv djup i de hörn som ska höjas eller sänkas för sig. Tomt hörn följer övriga mått, och botten blir en jämn yta mellan hörnen.'));
+        var cr=el('button','wide-btn','Rensa hörnen');cr.type='button';
+        cr.addEventListener('click',function(){['c11','c21','c12','c22'].forEach(function(k){delete f.raw[k];});refresh({editor:true});});
+        b1.appendChild(cr);
+      }
     }
     if(!isV){
       var fw=el('div','fields');var wf=fieldEl(f,'work','Arbetsutrymme runt om','m',false);wf.querySelector('input').placeholder='0';fw.appendChild(wf);b1.appendChild(fw);
@@ -4639,7 +4731,7 @@ function renderEditor(){
   var res2=el('div','result sub');res2.appendChild(el('span',null,'Totalt alla figurer'));res2.appendChild(el('strong')).id='edTot';
   hdr.appendChild(res2);
 
-  if(panes.fyll){fillUI(f,panes.fyll);if(!(f.fill&&f.fill.on))dukUI(f,panes.fyll);}
+  if(panes.fyll){fillUI(f,panes.fyll);if(!(f.fill&&f.fill.on)){votFillUI(f,panes.fyll);dukUI(f,panes.fyll);}}
   box=panes.plac;
   var bp=sec(box,'place','Placering',true);
   var fp=el('div','fields');
@@ -4752,7 +4844,7 @@ function sketchNote(t){return '<div class="small-note" style="padding:8px">'+t+'
 function quadPlanSVG(f){
   var L1=num(f.raw.length),W1=num(f.raw.width),L2=blank(f.raw.length2)?L1:num(f.raw.length2),W2=blank(f.raw.width2)?W1:num(f.raw.width2);
   if(![L1,W1,L2,W2].every(function(v){return isFinite(v)&&v>0;}))return sketchNote('Fyll i sidorna för att se figuren ovanifrån.');
-  var q=quadFromSides(L1,L2,W1,W2);if(!q)return sketchNote('Sidorna går inte ihop till en fyrhörning.');
+  var q=f.sym?[[0,0],[L1,(W1-W2)/2],[L1,(W1+W2)/2],[0,W1]]:quadFromSides(L1,L2,W1,W2);if(!q)return sketchNote('Sidorna går inte ihop till en fyrhörning.');
   var W=300,H=130,pad=36,x0=Infinity,x1=-Infinity,z0=Infinity,z1=-Infinity;
   q.forEach(function(p){x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);z0=Math.min(z0,p[1]);z1=Math.max(z1,p[1]);});
   var sc=Math.min((W-2*pad-40)/(x1-x0),(H-2*pad+10)/(z1-z0)),ox=(W-(x1-x0)*sc)/2,oz=(H-(z1-z0)*sc)/2;
@@ -5400,7 +5492,17 @@ function solidGeometry3(R,colorOf,skip){
   function tri(a,b,c,cl,k){v(a,cl);v(b,cl);v(c,cl);keys.push(k);}
   var n=R[0].length,i,kT={top:true},kB={bottom:true};
   var c0=colorOf(kT),c1=colorOf(kB);
-  for(i=1;i<n-1;i++){tri(R[0][0],R[0][i],R[0][i+1],c0,kT);tri(R[R.length-1][0],R[R.length-1][i+1],R[R.length-1][i],c1,kB);}
+  /* Locket och botten trianglas så att även hörn som går inåt (L-form, inbuktning) blir rätt. En enkel solfjäder fyller annars igen inbuktningen. */
+  var P2=R[0].map(function(p){return new THREE.Vector2(p[0],p[2]);}),ar=0,tr=null,RL=R[R.length-1];
+  for(i=0;i<n;i++){var q2=P2[(i+1)%n];ar+=P2[i].x*q2.y-q2.x*P2[i].y;}
+  /* En fyrhörning delas alltid från första punkten (samma delning som i volymberäkningen), annars väljer triangleringen */
+  if(n>4)try{tr=THREE.ShapeUtils.triangulateShape(P2.slice(),[]);}catch(e){tr=null;}
+  if(!tr||!tr.length){tr=[];for(i=1;i<n-1;i++)tr.push([0,i,i+1]);}
+  tr.forEach(function(t){
+    var a=P2[t[0]],b=P2[t[1]],c=P2[t[2]];
+    if(((b.x-a.x)*(c.y-a.y)-(c.x-a.x)*(b.y-a.y))*ar<0)t=[t[0],t[2],t[1]];
+    tri(R[0][t[0]],R[0][t[1]],R[0][t[2]],c0,kT);tri(RL[t[0]],RL[t[2]],RL[t[1]],c1,kB);
+  });
   for(var s=0;s<R.length-1;s++){
     var A=R[s],B=R[s+1];
     for(i=0;i<n;i++){var j=(i+1)%n,k={s:s,i:i},rp=skip&&skip(s,i),cl=colorOf(k);
@@ -6955,7 +7057,7 @@ function buildXlsx(sheets){
   files[0].data=files[0].data.replace('<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>',ov);
   return zipStore(files);
 }
-var XLBL={topsoil:['Matjordsavtagning, tjocklek','m'],topsoilEx:['Matjordsavtagning runt om, bredd','m'],work:['Arbetsutrymme runt om','m'],crown:['Bombering','%'],depth2:['Djup vid kortsida 2','m'],length:['Långsida 1 / längd','m'],length2:['Långsida 2','m'],width:['Kortsida 1 / bredd','m'],width2:['Kortsida 2','m'],depth:['Djup / höjd','m'],height:['Höjd','m'],
+var XLBL={topsoil:['Matjordsavtagning, tjocklek','m'],topsoilEx:['Matjordsavtagning runt om, bredd','m'],work:['Arbetsutrymme runt om','m'],crown:['Bombering','%'],depth2:['Djup vid kortsida 2','m'],c11:['Djup hörn kortsida 1, långsida 1','m'],c21:['Djup hörn kortsida 2, långsida 1','m'],c12:['Djup hörn kortsida 1, långsida 2','m'],c22:['Djup hörn kortsida 2, långsida 2','m'],length:['Långsida 1 / längd','m'],length2:['Långsida 2','m'],width:['Kortsida 1 / bredd','m'],width2:['Kortsida 2','m'],depth:['Djup / höjd','m'],height:['Höjd','m'],
   aL1:['Släntlutning långsida 1','°'],aL2:['Släntlutning långsida 2','°'],aK1:['Släntlutning kortsida 1','°'],aK2:['Släntlutning kortsida 2','°'],angle:['Släntlutning','°'],
   gFloor:['Schaktbottens lutning, K1 → K2','°'],gFloorX:['Schaktbottens lutning, L1 → L2','°'],gRoof:['Markytans lutning, K1 → K2','°'],gRoofX:['Markytans lutning, L1 → L2','°'],
   diameter:['Diameter','m'],rBot:['Rundning i botten (radie)','m'],rTop:['Rundning av kanten i markytan (radie)','m'],cover:['Täckning, djup till rörets hjässa','m'],lift1:['Höjdläge ände 1','m'],lift2:['Höjdläge ände 2','m']};
@@ -7588,7 +7690,7 @@ $('#pdfBtn').addEventListener('click',function(){
 var STORE='volymkalkylator.ritningar.v1';
 function readStore(){try{var o=JSON.parse(localStorage.getItem(STORE)||'{}');return o&&typeof o==='object'?o:{};}catch(e){return {};}}
 function writeStore(o){try{localStorage.setItem(STORE,JSON.stringify(o));return true;}catch(e){return false;}}
-var SAVE_KEYS=['duk','soilLayers','bowl','parts','fill','fillCount','type','kind','sur','link','group','follow','countVol','surf','surfKind','name','raw','pos','rot','tilt','lift','above','nZones','nLevels','orient','points','bends','rounds','closed','useSlope','showVoid','voidRef','voidInTotal','pipeInTotal','color','sideColors','vot'];
+var SAVE_KEYS=['duk','soilLayers','bowl','parts','fill','fillCount','type','kind','sur','link','group','follow','countVol','surf','surfKind','name','raw','pos','rot','tilt','lift','above','nZones','nLevels','orient','points','bends','rounds','closed','useSlope','showVoid','voidRef','voidInTotal','pipeInTotal','color','sideColors','vot','sym'];
 function serialize(){
   return {v:1,massSurAll:app.massSurAll,topsoilKeep:app.topsoilKeep,soil:app.soil,loosen:app.loosen,loadVol:app.loadVol,loadTon:app.loadTon,surfTon:app.surfTon,surfVol:app.surfVol,moist:app.moist,moistMass:app.moistMass,moistSoil:app.moistSoil,tid:app.tid,notes:app.notes.map(function(N){return {text:N.text,p:N.p,dx:N.dx,dy:N.dy,w:N.w};}),ovlOn:app.ovlOn,massPack:app.massPack,openWalls:app.openWalls.map(function(E){return {pts:E.pts};}),massSur:app.massSur,buy:app.buy,recv:app.recv,recvX:app.recvX,tillOn:app.tillOn,rab:app.rab,mach:app.mach,fordon:app.fordon,fordonExtra:!!app.fordonExtra,lassSep:!!app.lassSep,xrem:app.xrem,bergOver:app.bergOver,extra:app.extra,ground:{slope:app.gSlope,dir:app.gDir},groups:app.groups,sur:app.sur,figs:app.figs.map(function(f){var o={};SAVE_KEYS.forEach(function(k){if(f[k]!==undefined)o[k]=JSON.parse(JSON.stringify(f[k]));});
     var hi=f.host?app.figs.findIndex(function(h){return h.id===f.host;}):-1;if(hi>=0&&f.hostOff){o.hostIx=hi;o.hostOff=JSON.parse(JSON.stringify(f.hostOff));}return o;})};
@@ -7601,6 +7703,8 @@ function loadDrawing(d,keepView){
     if(o.type==='obj'&&!OBJ[o.kind])return;
     var f=createFigure(o.type==='obj'?'obj:'+o.kind:o.type);
     SAVE_KEYS.forEach(function(k){if(k!=='type'&&k!=='link'&&o[k]!==undefined)f[k]=o[k];});
+    /* Äldre ritningar saknar symmetrisk form och behåller sin form */
+    if(o.sym===undefined)f.sym=false;
     if(o.link!=null)f.link='L'+o.link;
     if(!Array.isArray(f.pos)||f.pos.length!==2)f.pos=[0,0];
     f.history=[];if(f.type==='custom')fixArrays(f);

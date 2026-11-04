@@ -5244,7 +5244,7 @@ function updateViewerUI(){
     if(app.tool==='rotera')hint='Dra för att vrida. Scrolla för att zooma.';
     else if(app.tool==='runda')hint='Dra i en fyrkant för att böja en sida, eller ut från ett hörn för att runda det.'+cam;
     else if(!f.closed)hint=(f.points.length?'Klicka ut nästa hörn. Klicka på första hörnet för att stänga.':'Klicka på rutnätet för att sätta första hörnet.')+cam;
-    else if(app.tool==='djup')hint='Dra upp eller ned för att ändra djupet.'+cam;
+    else if(app.tool==='djup')hint='Dra på figuren upp eller ned för att ändra djupet. Dra bredvid för att vrida vyn. Håll höger knapp samtidigt för att vrida vyn under tiden.';
     else hint='Dra i ett hörn för att flytta det, eller i en fyrkant för att böja sidan.'+cam;
   }else if(f){hint=TOUCH?'Ett finger vrider, två flyttar och zoomar.':'Dra: vrid. Högerklick: flytta. Scroll: zooma.';basicHint=true;}
   if(app.ruler)hint='Dra från start till slut för att mäta. Linjalen fäster mot kanter och hörn.';
@@ -6583,7 +6583,7 @@ function bindPointers(){
       else if(vi>=0&&!closeTap){act.type='vertex';act.vi=vi;}
       else if(ei>=0){act.type='bend';act.ei=ei;}
       else if(app.tool==='rita'&&!f.closed)act.type='add';
-      else if(app.tool==='djup'&&f.closed){act.type='depth';var d0=num(f.raw.depth);act.d0=isFinite(d0)&&d0>0?d0:1;}
+      else if(app.tool==='djup'&&f.closed&&pickFigure(e)===f.id){act.type='depth';var d0=num(f.raw.depth);act.d0=isFinite(d0)&&d0>0?d0:1;}
     }
   });
   canvas.addEventListener('pointermove',function(e){
@@ -6608,6 +6608,7 @@ function bindPointers(){
     var dx=e.clientX-act.lx,dy=e.clientY-act.ly;act.lx=e.clientX;act.ly=e.clientY;
     act.moved=Math.max(act.moved,Math.hypot(e.clientX-act.x0,e.clientY-act.y0));
     if(act.type==='pan'){panView(dx,dy);return;}
+    if(act.type==='depth'&&(e.buttons&2)){view.theta-=dx*0.006;view.phi=clamp(view.phi-dy*0.006,0.05,PHIMAX);act.y0+=dy;requestRender();return;}
     if(act.type==='measure'){var rq=rulerPoint(e);if(rq){app.measures[app.measures.length-1].b=rq;updateRuler();}return;}
     if(act.type==='rotate'){view.theta-=dx*0.006;view.phi=clamp(view.phi-dy*0.006,0.05,PHIMAX);requestRender();return;}
     if(act.moved<3)return;
